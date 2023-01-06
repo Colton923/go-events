@@ -89,12 +89,9 @@ export default function Index() {
         totalEvent: item['Event Net Profit'],
       }
     })
+    json.shift()
     return json
   }
-
-  useEffect(() => {
-    if (json.length > 1) setAllowSubmit(true)
-  }, [json])
 
   const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return
@@ -124,7 +121,6 @@ export default function Index() {
         },
         (err, data) => {
           const json = csvDataToJSON(data)
-          console.log('jsonTest', json)
           setJson(json)
         }
       )
@@ -135,6 +131,11 @@ export default function Index() {
   useEffect(() => {
     if (allUserPhoneNumbers.length === 0) {
       getAllUserPhoneNumbers()
+    }
+    if (json.length > 1) {
+      setAllowSubmit(true)
+    } else {
+      setAllowSubmit(false)
     }
   }, [])
 
@@ -171,7 +172,6 @@ export default function Index() {
       try {
         await addDoc(dataCol, data)
         alert('Data uploaded successfully')
-        clearData()
       } catch (e) {
         alert('Error uploading data')
         console.log(e)
@@ -211,31 +211,35 @@ export default function Index() {
     }
   }
 
-  const clearData = () => {
-    setJson([])
-    setFilename('')
-  }
-
   const handleFirebaseData = () => {
-    const dataForGrid: any[] = []
-    const dataCol = collection(db, 'data')
-    const querySnapshot = getDocs(dataCol)
-    querySnapshot.then((querySnapshot) => {
-      querySnapshot.forEach((doc) => {
-        const dataset = doc.data().data
-        dataset.forEach((item: any) => {
-          dataForGrid.push(item)
+    try {
+      const dataForGrid: any[] = []
+      const dataCol = collection(db, 'data')
+      const querySnapshot = getDocs(dataCol)
+      querySnapshot
+        .then((querySnapshot) => {
+          querySnapshot.forEach((doc) => {
+            const dataset = doc.data().data
+            dataset.forEach((item: any) => {
+              dataForGrid.push(item)
+            })
+          })
         })
-      })
-    })
-    setJson(dataForGrid)
+        .then(() => {
+          setJson(dataForGrid)
+        })
+    } catch (e) {
+      alert('Error getting data from database')
+    }
   }
 
+  //use Effect to change ag grid data when json changes
   useEffect(() => {
-    console.log(json)
     if (json.length > 0) {
       //@ts-ignore
       setRowData(json)
+      setFilename('')
+      console.log('changing row data')
     }
   }, [json])
 
@@ -265,17 +269,13 @@ export default function Index() {
         type="button"
         value="Submit to Database"
         onClick={handleSubmitToDatabase}
-        disabled={!allowSubmit}
       />
       <input type="button" value="View Firebase Data" onClick={handleFirebaseData} />
       <div className="ag-theme-alpine" style={{ height: 400, width: screenWidth }}>
         <AgGridReact
-          //@ts-ignore
-          ref={gridRef}
-          rowData={rowData}
+          gridOptions={{ rowHeight: 30, headerHeight: 30 }}
           columnDefs={columnDefs}
-          defaultColDef={defaultColDef}
-          onCellClicked={cellClickedListener}
+          rowData={rowData}
         />
       </div>
     </div>
