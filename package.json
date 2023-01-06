@@ -1,4 +1,14 @@
 {
+  "name": "go-events",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx,ts,tsx}": "eslint --cache --fix"
+  },
   "dependencies": {
     "@types/node": "^18.11.18",
     "@types/react": "^18.0.26",
@@ -18,5 +28,12 @@
     "react-firebase-hooks": "^5.1.1",
     "typescript": "^4.9.4",
     "vercel": "^19.1.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.28.0",
+    "eslint-config-next": "^13.0.5",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-react": "^7.31.11"
   }
 }
