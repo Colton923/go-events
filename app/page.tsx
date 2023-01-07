@@ -18,7 +18,7 @@ import { ImportFirebaseDataButton } from '../components/importFirebase/ImportFir
 
 import styles from '../styles/Home.module.css'
 
-export default function Index() {
+export default function Home() {
   const [loggedIn, setLoggedIn] = useState(false)
   const [user] = useAuthState(auth)
   const [screenWidth, setScreenWidth] = useState(0)
