@@ -6,7 +6,7 @@ import { auth } from '../../firebase/firebaseClient'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { LoginProps } from '../../types/props'
 import { MyUserName } from '../../firebase/myUserName'
-import styles from './Login.module.css'
+import styles from '../../styles/App.module.css'
 
 export const Login = (props: LoginProps) => {
   const [phoneNumber, setPhoneNumber] = useState('')

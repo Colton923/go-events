@@ -5,6 +5,7 @@ import { AgGridReact, AgGridColumn } from 'ag-grid-react'
 import { ColDef } from 'ag-grid-community'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
+import styles from '../../styles/App.module.css'
 
 import { GridProps } from '../../types/props'
 import { CommissionData } from '../../types/data'

@@ -1,7 +1,7 @@
 import { ExportButtonProps } from '../../types/props'
 import { collection, addDoc } from 'firebase/firestore'
 import { db } from '../../firebase/firebaseClient'
-import styles from './ExportButton.module.css'
+import styles from '../../styles/App.module.css'
 
 export const ExportButton = (props: ExportButtonProps) => {
   const handleSubmitToDatabase = () => {

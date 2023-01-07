@@ -3,7 +3,7 @@ import type { MergedData } from '../../types/data'
 import type { CommissionData } from '../../types/data'
 import { collection, getDocs } from 'firebase/firestore'
 import { db } from '../../firebase/firebaseClient'
-import styles from './ImportFirebaseDataButton.module.css'
+import styles from '../../styles/App.module.css'
 
 export const ImportFirebaseDataButton = (props: ImportFirebaseDataButtonProps) => {
   const handleFirebaseData = () => {

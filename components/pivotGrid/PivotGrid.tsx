@@ -8,6 +8,7 @@ import 'ag-grid-community/styles/ag-theme-alpine.css'
 
 import { PivotGridProps } from '../../types/props'
 import { PivotCommissionData } from '../../types/data'
+import styles from '../../styles/App.module.css'
 
 export const PivotGrid = (props: PivotGridProps) => {
   // I want the valueGetter to be a function that returns the props.rowData["column header"]

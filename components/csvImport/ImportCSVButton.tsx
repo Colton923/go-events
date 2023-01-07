@@ -3,7 +3,7 @@ import { ChangeEvent } from 'react'
 import { parse } from 'csv-parse'
 import { csvDataToJSON } from '../../utils/csvDataToJSON'
 import { ImportCSVButtonProps } from '../../types/props'
-import styles from './ImportCSVButton.module.css'
+import styles from '../../styles/App.module.css'
 
 export const ImportCSVButton = (props: ImportCSVButtonProps) => {
   const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
