@@ -1,152 +1,29 @@
 'use client'
-import { parse } from 'csv-parse'
-import {
-  useState,
-  useRef,
-  useEffect,
-  useMemo,
-  useCallback,
-  ChangeEvent,
-} from 'react'
-import { render } from 'react-dom'
-import { AgGridReact } from 'ag-grid-react'
+
+import { useState, useEffect } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth'
-import { db, auth } from '../firebase/firebaseClient'
+import { auth } from '../firebase/firebaseClient'
 
-import 'ag-grid-community/styles/ag-grid.css'
-import 'ag-grid-community/styles/ag-theme-alpine.css'
-
-import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth'
-import { collection, getDocs, addDoc } from 'firebase/firestore'
+import { Grid } from '../components/grid/Grid'
+import { PivotGrid } from '../components/pivotGrid/PivotGrid'
+import { ImportCSVButton } from '../components/csvImport/ImportCSVButton'
+import type {
+  CommissionData,
+  PivotCommissionData,
+  PivotCommissionTotals,
+} from '../types/data'
+import { Login } from '../components/login/Login'
+import { ExportButton } from '../components/firebaseExport/ExportButton'
+import { ImportFirebaseDataButton } from '../components/importFirebase/ImportFirebaseDataButton'
 
 export default function Index() {
-  const [phoneNumber, setPhoneNumber] = useState('')
+  const [loggedIn, setLoggedIn] = useState(false)
   const [user] = useAuthState(auth)
   const [screenWidth, setScreenWidth] = useState(0)
-  const [allowSubmit, setAllowSubmit] = useState(false)
   const [filename, setFilename] = useState('')
-  const [json, setJson] = useState([
-    {
-      client: '',
-      organization: '',
-      id: '',
-      date: '',
-      employee: '',
-      status: '',
-      salesperson: '',
-      actionDate: '',
-      nextAction: '',
-      totalFee: '',
-      totalEmployee: '',
-      totalEvent: '',
-    },
-  ])
-  const [rowData, setRowData] = useState()
-  const [columnDefs, setColumnDefs] = useState([
-    { headerName: 'Client Name', field: 'client' },
-    { headerName: 'Organization / Company', field: 'organization' },
-    { headerName: 'Event ID', field: 'id' },
-    { headerName: 'Event Date', field: 'date' },
-    { headerName: 'Assigned Employee', field: 'employee' },
-    { headerName: 'Status', field: 'status' },
-    { headerName: 'Salesperson', field: 'salesperson' },
-    { headerName: 'Action Date', field: 'actionDate' },
-    { headerName: 'Next Action', field: 'nextAction' },
-    { headerName: 'Total Fee', field: 'totalFee' },
-    { headerName: 'Employee Wage Total', field: 'totalEmployee' },
-    { headerName: 'Event Net Profit', field: 'totalEvent' },
-  ])
-  const [allUserPhoneNumbers, setAllUserPhoneNumbers] = useState<string[]>([])
+  const [rowData, setRowData] = useState<CommissionData[]>([])
 
-  const gridRef = useRef()
-  const defaultColDef = useMemo(
-    () => ({
-      flex: 1,
-      minWidth: 100,
-      resizable: true,
-    }),
-    []
-  )
-
-  const cellClickedListener = useCallback((e: any) => {
-    console.log(e)
-  }, [])
-
-  const csvDataToJSON = (data: any[]) => {
-    const json = data.map((item) => {
-      return {
-        client: item['Client Name'],
-        organization: item['Organization / Company'],
-        id: item['Event ID'],
-        date: item['Event Date'],
-        employee: item['Assigned Employee'],
-        status: item['Status'],
-        salesperson: item['Salesperson'],
-        actionDate: item['Action Date'],
-        nextAction: item['Next Action'],
-        totalFee: item['Total Fee'],
-        totalEmployee: item['Employee Wage Total'],
-        totalEvent: item['Event Net Profit'],
-      }
-    })
-    json.shift()
-    return json
-  }
-
-  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return
-    const file = e.target.files[0]
-    setFilename(file.name.split('.').slice(0, -1).join('.'))
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      if (!e.target) return
-      const text = e.target.result
-      parse(
-        text as string,
-        {
-          columns: [
-            'Client Name',
-            'Organization / Company',
-            'Event ID',
-            'Event Date',
-            'Assigned Employee',
-            'Status',
-            'Salesperson',
-            'Action Date',
-            'Next Action',
-            'Total Fee',
-            'Employee Wage Total',
-            'Event Net Profit',
-          ],
-        },
-        (err, data) => {
-          const json = csvDataToJSON(data)
-          setJson(json)
-        }
-      )
-    }
-    reader.readAsText(file)
-  }
-
-  useEffect(() => {
-    if (allUserPhoneNumbers.length === 0) {
-      getAllUserPhoneNumbers()
-    }
-    if (json.length > 1) {
-      setAllowSubmit(true)
-    } else {
-      setAllowSubmit(false)
-    }
-  }, [])
-
-  const getAllUserPhoneNumbers = async () => {
-    fetch('/api/firebase/get/firebasePhoneNumbers')
-      .then((res) => res.json())
-      .then((data) => {
-        setAllUserPhoneNumbers(data)
-      })
-  }
-
+  // Gets the screen width on load and on resize
   useEffect(() => {
     const handleScreenResize = () => {
       setScreenWidth(window.innerWidth)
@@ -156,128 +33,108 @@ export default function Index() {
     return () => window.removeEventListener('resize', handleScreenResize)
   }, [])
 
-  const handleSubmitToDatabase = () => {
-    if (!user) {
-      alert('You must be logged in to submit data')
-    }
-    const dataCol = collection(db, 'data')
-    const uploadDateTime = new Date().toISOString()
-    const data = {
-      filename,
-      uploadDateTime,
-      data: json,
-      user: user?.uid,
-    }
-    const addData = async () => {
-      try {
-        await addDoc(dataCol, data)
-        alert('Data uploaded successfully')
-      } catch (e) {
-        alert('Error uploading data')
-        console.log(e)
-      }
-    }
-    addData()
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
+  const handleDateFilter = () => {
+    const filteredData = rowData.filter((row) => {
+      const rowDate = new Date(row.date)
+      const start = new Date(startDate)
+      const end = new Date(endDate)
+      return rowDate >= start && rowDate <= end
+    })
+    setRowData(filteredData)
   }
 
-  const handleSignIn = () => {
-    const phone = '+1' + phoneNumber
-    if (allUserPhoneNumbers.includes(phone)) {
-      const reCaptchaVerifier = new RecaptchaVerifier(
-        'recaptcha-container',
-        {
-          size: 'invisible',
-        },
-        auth
-      )
-      signInWithPhoneNumber(auth, phone, reCaptchaVerifier).then(
-        (confirmationResult) => {
-          const code = prompt('Enter the code')
-          if (code) {
-            confirmationResult
-              .confirm(code)
-              .then((result) => {
-                alert('Success')
-              })
-              .catch((error) => {
-                alert('Error')
-                console.log(error)
-              })
-          }
-        }
-      )
-    } else {
-      alert('Phone number not found')
-    }
+  const [pivotData, setPivotData] = useState<PivotCommissionData[]>([])
+  const handlePivot = () => {
+    const uniqueIDs = [...new Set(rowData.map((row) => row.id))]
+    const tempPivotData: PivotCommissionData[] = []
+    uniqueIDs.forEach((id) => {
+      tempPivotData.push({
+        salesperson: '',
+        organization: '',
+        id: id,
+        totalEmployee: 0,
+      })
+    })
+    rowData.forEach((row) => {
+      const index = tempPivotData.findIndex((item) => item.id === row.id)
+      tempPivotData[index].salesperson = row.salesperson
+      tempPivotData[index].organization = row.organization
+      tempPivotData[index].totalEmployee += parseInt(row.totalEmployee)
+    })
+    setPivotData(tempPivotData)
   }
 
-  const handleFirebaseData = () => {
-    try {
-      const dataForGrid: any[] = []
-      const dataCol = collection(db, 'data')
-      const querySnapshot = getDocs(dataCol)
-      querySnapshot
-        .then((querySnapshot) => {
-          querySnapshot.forEach((doc) => {
-            const dataset = doc.data().data
-            dataset.forEach((item: any) => {
-              dataForGrid.push(item)
-            })
-          })
+  const [pivotTotals, setPivotTotals] = useState<PivotCommissionTotals[]>([])
+  const handlePivotTotals = () => {
+    if (pivotData.length > 0) {
+      const uniqueSalespeople = [...new Set(pivotData.map((row) => row.salesperson))]
+      const tempPivotTotals: PivotCommissionTotals[] = []
+      uniqueSalespeople.forEach((salesperson) => {
+        tempPivotTotals.push({
+          salesperson: salesperson,
+          totalEmployee: 0,
         })
-        .then(() => {
-          setJson(dataForGrid)
-        })
-    } catch (e) {
-      alert('Error getting data from database')
+      })
+      pivotData.forEach((row) => {
+        const index = tempPivotTotals.findIndex(
+          (item) => item.salesperson === row.salesperson
+        )
+        tempPivotTotals[index].totalEmployee += row.totalEmployee
+      })
+      setPivotTotals(tempPivotTotals)
     }
   }
 
-  //use Effect to change ag grid data when json changes
-  useEffect(() => {
-    if (json.length > 0) {
-      //@ts-ignore
-      setRowData(json)
-      setFilename('')
-      console.log('changing row data')
-    }
-  }, [json])
-
-  if (!user)
-    return (
-      <div>
-        <div id="recaptcha-container"></div>
-        <h1>Please Sign In</h1>
-        <input
-          type="text"
-          id="phone"
-          placeholder="###-###-####"
-          onChange={(e) => setPhoneNumber(e.target.value)}
-        />
-        <input type="button" value="Sign In" onClick={handleSignIn} />
-      </div>
-    )
   return (
     <div>
-      <h1>Welcome Back User#{user?.uid}</h1>
-      <h1>CSV Only</h1>
-      <input type="file" onChange={handleFileUpload} accept=".csv" />
-      <h2>File Name: {filename}</h2>
-      <h2>CSV Data</h2>
-      <h2>Grid</h2>
-      <input
-        type="button"
-        value="Submit to Database"
-        onClick={handleSubmitToDatabase}
-      />
-      <input type="button" value="View Firebase Data" onClick={handleFirebaseData} />
-      <div className="ag-theme-alpine" style={{ height: 400, width: screenWidth }}>
-        <AgGridReact
-          gridOptions={{ rowHeight: 30, headerHeight: 30 }}
-          columnDefs={columnDefs}
-          rowData={rowData}
-        />
-      </div>
+      <Login user={user} setLoggedIn={setLoggedIn} />
+      {loggedIn ? (
+        <div>
+          <h1>CSV Only</h1>
+          <ImportCSVButton setRowData={setRowData} setFilename={setFilename} />
+          <h2>File Name: {filename}</h2>
+          <h2>CSV Data</h2>
+          <h2>Grid</h2>
+          <ExportButton rowData={rowData} filename={filename} user={user} />
+          <ImportFirebaseDataButton setRowData={setRowData} user={user} />
+          <div>
+            <h1>Date Filter</h1>
+            <h1>Start Date</h1>
+            <input type="text" onChange={(e) => setStartDate(e.target.value)} />
+            <h1>End Date</h1>
+            <input type="text" onChange={(e) => setEndDate(e.target.value)} />
+            <input type="button" value="Date Filter" onClick={handleDateFilter} />
+          </div>
+          <div>
+            <h1>Pivot Totals</h1>
+            <input type="button" value="Show Totals" onClick={handlePivotTotals} />
+            {pivotTotals
+              ? pivotTotals.map((row, index) => {
+                  return (
+                    <div key={index}>
+                      <h1>{row.salesperson}</h1>
+                      <h1>{row.totalEmployee}</h1>
+                    </div>
+                  )
+                })
+              : null}
+          </div>
+
+          <div>
+            <h1>Pivoted Data Grid</h1>
+            <input type="button" value="Simple Pivot" onClick={handlePivot} />
+            {pivotData ? (
+              <PivotGrid rowData={pivotData} width={screenWidth} />
+            ) : null}
+          </div>
+          <div>
+            <h1>All Data Grid</h1>
+            {rowData ? <Grid rowData={rowData} width={screenWidth} /> : null}
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }
