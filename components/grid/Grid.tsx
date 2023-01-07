@@ -68,6 +68,7 @@ export const Grid = (props: GridProps) => {
     <div>
       <div className="ag-theme-alpine" style={{ height: 500, width: props.width }}>
         <AgGridReact
+          //@ts-ignore
           ref={gridRef}
           rowData={props.rowData}
           defaultColDef={defaultColDef}

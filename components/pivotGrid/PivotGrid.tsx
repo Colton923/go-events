@@ -56,6 +56,7 @@ export const PivotGrid = (props: PivotGridProps) => {
     <div>
       <div className="ag-theme-alpine" style={{ height: 500, width: props.width }}>
         <AgGridReact
+          //@ts-ignore
           ref={gridRef}
           rowData={props.rowData}
           defaultColDef={defaultColDef}
