@@ -16,9 +16,9 @@ import { Login } from '../components/login/Login'
 import { ExportButton } from '../components/firebaseExport/ExportButton'
 import { ImportFirebaseDataButton } from '../components/importFirebase/ImportFirebaseDataButton'
 
-import styles from '../styles/Home.module.css'
+import styles from '../styles/App.module.css'
 
-export default function Home() {
+export default function Index() {
   const [loggedIn, setLoggedIn] = useState(false)
   const [user] = useAuthState(auth)
   const [screenWidth, setScreenWidth] = useState(0)
