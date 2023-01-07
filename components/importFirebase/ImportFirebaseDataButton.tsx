@@ -3,6 +3,7 @@ import type { MergedData } from '../../types/data'
 import type { CommissionData } from '../../types/data'
 import { collection, getDocs } from 'firebase/firestore'
 import { db } from '../../firebase/firebaseClient'
+import styles from './ImportFirebaseDataButton.module.css'
 
 export const ImportFirebaseDataButton = (props: ImportFirebaseDataButtonProps) => {
   const handleFirebaseData = () => {
@@ -53,7 +54,12 @@ export const ImportFirebaseDataButton = (props: ImportFirebaseDataButtonProps) =
 
   return (
     <div>
-      <input type="button" value="View Firebase Data" onClick={handleFirebaseData} />
+      <input
+        className={styles.input}
+        type="button"
+        value="View Firebase Data"
+        onClick={handleFirebaseData}
+      />
     </div>
   )
 }

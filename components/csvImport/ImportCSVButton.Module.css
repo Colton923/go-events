@@ -1,0 +1,22 @@
+.input {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--secondaryColor);
+
+  background-color: #ffffff;
+  border: 1px solid var(--primaryColor);
+  border-radius: 5px;
+}
+
+.input:hover {
+  transform: scale(1.1);
+}
+
+.input:action {
+  transform: scale(1.1);
+}

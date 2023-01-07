@@ -7,7 +7,6 @@ import 'ag-grid-community/styles/ag-theme-alpine.css'
 
 import { GridProps } from '../../types/props'
 import { CommissionData } from '../../types/data'
-
 export const Grid = (props: GridProps) => {
   // I want the valueGetter to be a function that returns the props.rowData["column header"]
   const valueGetter = (params: any) => {

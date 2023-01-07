@@ -16,6 +16,8 @@ import { Login } from '../components/login/Login'
 import { ExportButton } from '../components/firebaseExport/ExportButton'
 import { ImportFirebaseDataButton } from '../components/importFirebase/ImportFirebaseDataButton'
 
+import styles from '../styles/Home.module.css'
+
 export default function Index() {
   const [loggedIn, setLoggedIn] = useState(false)
   const [user] = useAuthState(auth)
@@ -26,7 +28,8 @@ export default function Index() {
   // Gets the screen width on load and on resize
   useEffect(() => {
     const handleScreenResize = () => {
-      setScreenWidth(window.innerWidth)
+      const width = window.innerWidth * 0.9
+      setScreenWidth(width)
     }
     window.addEventListener('resize', handleScreenResize)
     handleScreenResize()
@@ -88,50 +91,92 @@ export default function Index() {
   }
 
   return (
-    <div>
-      <Login user={user} setLoggedIn={setLoggedIn} />
+    <div className={styles.main}>
+      <div className={styles.title}>
+        <Login user={user} setLoggedIn={setLoggedIn} />
+      </div>
       {loggedIn ? (
-        <div>
-          <h1>CSV Only</h1>
-          <ImportCSVButton setRowData={setRowData} setFilename={setFilename} />
-          <h2>File Name: {filename}</h2>
-          <h2>CSV Data</h2>
-          <h2>Grid</h2>
-          <ExportButton rowData={rowData} filename={filename} user={user} />
-          <ImportFirebaseDataButton setRowData={setRowData} user={user} />
-          <div>
-            <h1>Date Filter</h1>
-            <h1>Start Date</h1>
-            <input type="text" onChange={(e) => setStartDate(e.target.value)} />
-            <h1>End Date</h1>
-            <input type="text" onChange={(e) => setEndDate(e.target.value)} />
-            <input type="button" value="Date Filter" onClick={handleDateFilter} />
+        <div className={styles.allCardsWrapper}>
+          <div className={styles.cardWrapper}>
+            <h1 className={styles.header}>CSV Only</h1>
+            <div className={styles.buttonWrapper}>
+              <ImportCSVButton setRowData={setRowData} setFilename={setFilename} />
+            </div>
+            <h2 className={styles.header}>File Name: {filename}</h2>
+            <div className={styles.buttonWrapper}>
+              <ExportButton rowData={rowData} filename={filename} user={user} />
+            </div>
+            <div className={styles.buttonWrapper}>
+              <ImportFirebaseDataButton setRowData={setRowData} user={user} />
+            </div>
           </div>
-          <div>
-            <h1>Pivot Totals</h1>
-            <input type="button" value="Show Totals" onClick={handlePivotTotals} />
-            {pivotTotals
-              ? pivotTotals.map((row, index) => {
-                  return (
-                    <div key={index}>
-                      <h1>{row.salesperson}</h1>
-                      <h1>{row.totalEmployee}</h1>
-                    </div>
-                  )
-                })
-              : null}
+          <div className={styles.cardWrapper}>
+            <div>
+              <h1 className={styles.header}>Date Filter</h1>
+              <h1 className={styles.subHeader}>Start Date</h1>
+              <input
+                className={styles.input}
+                type="text"
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+              <h1 className={styles.subHeader}>End Date</h1>
+              <input
+                className={styles.input}
+                type="text"
+                onChange={(e) => setEndDate(e.target.value)}
+              />
+              <div className={styles.buttonWrapper}>
+                <input
+                  className={styles.input}
+                  type="button"
+                  value="Date Filter"
+                  onClick={handleDateFilter}
+                />
+              </div>
+            </div>
           </div>
-
-          <div>
-            <h1>Pivoted Data Grid</h1>
-            <input type="button" value="Simple Pivot" onClick={handlePivot} />
-            {pivotData ? (
-              <PivotGrid rowData={pivotData} width={screenWidth} />
-            ) : null}
+          <div className={styles.cardWrapper}>
+            <div>
+              <h1 className={styles.header}>Pivot Totals</h1>
+              <div className={styles.buttonWrapper}>
+                <input
+                  type="button"
+                  value="Show Totals"
+                  onClick={handlePivotTotals}
+                  className={styles.input}
+                />
+              </div>
+              {pivotTotals
+                ? pivotTotals.map((row, index) => {
+                    return (
+                      <div key={index} className={styles.totalsGrid}>
+                        <h1 className={styles.subHeader}>{row.salesperson}</h1>
+                        <h1 className={styles.subHeader}>{row.totalEmployee}</h1>
+                      </div>
+                    )
+                  })
+                : null}
+            </div>
           </div>
-          <div>
-            <h1>All Data Grid</h1>
-            {rowData ? <Grid rowData={rowData} width={screenWidth} /> : null}
+          <div className={styles.cardWrapper}>
+            <div className={styles.gridWrapper}>
+              <h1 className={styles.header}>Pivoted Data Grid</h1>
+              <input
+                className={styles.input}
+                type="button"
+                value="Simple Pivot"
+                onClick={handlePivot}
+              />
+              {pivotData ? (
+                <PivotGrid rowData={pivotData} width={screenWidth} />
+              ) : null}
+            </div>
+          </div>
+          <div className={styles.cardWrapper}>
+            <div className={styles.gridWrapper}>
+              <h1 className={styles.header}>All Data Grid</h1>
+              {rowData ? <Grid rowData={rowData} width={screenWidth} /> : null}
+            </div>
           </div>
         </div>
       ) : null}

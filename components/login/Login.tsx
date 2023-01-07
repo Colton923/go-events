@@ -3,15 +3,22 @@ import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth'
 import { auth } from '../../firebase/firebaseClient'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { LoginProps } from '../../types/props'
+import { MyUserName } from '../../firebase/myUserName'
+import styles from './Login.module.css'
 
 export const Login = (props: LoginProps) => {
   const [phoneNumber, setPhoneNumber] = useState('')
   const [allUserPhoneNumbers, setAllUserPhoneNumbers] = useState<string[]>([])
   const [user, setUser] = useState<any>(null)
   const [userLoggedIn] = useAuthState(auth)
+  const [userName, setUserName] = useState('')
 
   if (userLoggedIn) {
     props.setLoggedIn(true)
+    const name = MyUserName(userLoggedIn.uid)
+    name.then((result) => {
+      setUserName(result)
+    })
   }
 
   const getAllUserPhoneNumbers = async () => {
@@ -60,19 +67,25 @@ export const Login = (props: LoginProps) => {
   }
 
   if (props.user) {
-    return <div>Welcome Back {user}</div>
+    return <div>Welcome Back {userName}</div>
   } else {
     return (
       <div>
         <div id="recaptcha-container"></div>
         <h1>Please Sign In</h1>
         <input
+          className={styles.input}
           type="text"
           id="phone"
           placeholder="Phone Number"
           onChange={(e) => setPhoneNumber(e.target.value)}
         />
-        <input type="button" value="Sign In" onClick={handleSignIn} />
+        <input
+          className={styles.input}
+          type="button"
+          value="Sign In"
+          onClick={handleSignIn}
+        />
       </div>
     )
   }

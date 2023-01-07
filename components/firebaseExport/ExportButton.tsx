@@ -1,6 +1,7 @@
 import { ExportButtonProps } from '../../types/props'
 import { collection, addDoc } from 'firebase/firestore'
 import { db } from '../../firebase/firebaseClient'
+import styles from './ExportButton.module.css'
 
 export const ExportButton = (props: ExportButtonProps) => {
   const handleSubmitToDatabase = () => {
@@ -30,6 +31,7 @@ export const ExportButton = (props: ExportButtonProps) => {
   return (
     <div>
       <input
+        className={styles.input}
         type="button"
         value="Submit to Database"
         onClick={handleSubmitToDatabase}
