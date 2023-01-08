@@ -23,7 +23,6 @@ const handler = async (req: any, res: any) => {
   })
   const GetData = async () => {
     if (collectionNames.includes('data')) {
-      console.log('data collection exists')
       const docCol = db.collection('data')
       const doc = await docCol.get()
       const EmptyCol1 = async () => {
@@ -48,7 +47,6 @@ const handler = async (req: any, res: any) => {
       }
     }
     if (collectionNames.includes('cleanedData')) {
-      console.log('cleanedData collection exists')
       const docCol2 = db.collection('cleanedData')
       const doc2 = await docCol2.get()
       const EmptyCol2 = async () => {
@@ -75,16 +73,23 @@ const handler = async (req: any, res: any) => {
     return data
   }
   const FilterData = async () => {
-    console.log('filtering data, data.length: ' + data.length)
-    const ids = data.map((o) => o.id)
-    const filtered: CommissionData[] = data.filter(
-      ({ id }, index) => !ids.includes(id, index + 1)
-    )
-    data = filtered
+    data = data.reduce((acc: CommissionData[], current: CommissionData) => {
+      const x = acc.find((item: CommissionData) => {
+        item.totalEvent === current.totalEvent &&
+          item.employee === current.employee &&
+          item.id === current.id &&
+          item.date === current.date
+      })
+      if (!x) {
+        return acc.concat([current])
+      } else {
+        return acc
+      }
+    }, [])
+    return data
   }
 
   const FilterResults = () => {
-    console.log('filtering results, data.length: ' + data.length)
     mergedResults.reduce((acc: MergedResult[], current: MergedResult) => {
       const x = acc.find((item: MergedResult) => {
         item.filename === current.filename &&
