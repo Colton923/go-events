@@ -16,7 +16,9 @@ const handler = async (req: any, res: any) => {
   const commissionCol = db.collection('commission')
   const commissionDocs = await commissionCol.get()
   try {
-    commissionCol.doc(commissionDocs.docs[0].id).set({ data: CommissionManagerData })
+    commissionCol
+      .doc(commissionDocs.docs[0].id)
+      .set({ data: CommissionManagerData }, { merge: true })
     res.status(200).json({ message: 'success' })
   } catch (error) {
     res.status(500).json({ message: 'error' })
