@@ -1,7 +1,10 @@
-import type { CommissionData } from './data'
+import type { CommissionData, CommissionManagerData } from './data'
 import type { PivotCommissionData } from './data'
 export interface GridProps {
   rowData: CommissionData[]
+  width: number
+}
+export interface CommissionGridProps {
   width: number
 }
 
@@ -29,4 +32,8 @@ export interface ImportFirebaseDataButtonProps {
 export interface PivotGridProps {
   rowData: PivotCommissionData[]
   width: number
+}
+
+export interface CommissionManagerProps {
+  rowData: CommissionManagerData[]
 }

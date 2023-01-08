@@ -14,58 +14,109 @@ if (!admin.apps.length) {
 
 const handler = async (req: any, res: any) => {
   const db = admin.firestore()
-  const docCol = db.collection('data')
-  const doc = await docCol.get()
-  const data: CommissionData[] = []
-  doc.forEach((doc) => {
-    const docData = doc.data().data
-    docData.forEach((element: CommissionData) => {
-      data.push(element)
-    })
-  })
-  data.reduce((acc: CommissionData[], current: CommissionData) => {
-    const x = acc.find((item: CommissionData) => {
-      item.id === current.id &&
-        item.client === current.client &&
-        item.organization === current.organization &&
-        item.date === current.date &&
-        item.employee === current.employee &&
-        item.status === current.status &&
-        item.salesperson === current.salesperson &&
-        item.actionDate === current.actionDate &&
-        item.nextAction === current.nextAction &&
-        item.totalFee === current.totalFee &&
-        item.totalEmployee === current.totalEmployee &&
-        item.totalEvent === current.totalEvent
-    })
-    if (!x) {
-      return acc.concat([current])
-    } else {
-      return acc
-    }
-  }, [])
+  const collectionNames: string[] = []
+  let data: CommissionData[] = []
   const mergedResults: MergedResult[] = []
-  doc.forEach((doc) => {
-    const docData = doc.data()
-    const filename = docData.filename
-    const uploadDateTime = docData.uploadDateTime
-    const user = docData.user
-    mergedResults.push({ filename, uploadDateTime, user })
+  const collections = await db.listCollections()
+  collections.forEach((collection) => {
+    collectionNames.push(collection.id)
   })
-  const mergedData: MergedData = {
-    data,
-    mergedResults,
+  const GetData = async () => {
+    if (collectionNames.includes('data')) {
+      console.log('data collection exists')
+      const docCol = db.collection('data')
+      const doc = await docCol.get()
+      const EmptyCol1 = async () => {
+        doc.forEach((doc) => {
+          const docData = doc.data().data
+          const filename = docData.filename ? docData.filename : ''
+          const uploadDateTime = docData.uploadDateTime ? docData.uploadDateTime : ''
+          const user = docData.user ? docData.user : ''
+          mergedResults.push({ filename, uploadDateTime, user })
+          docData.forEach((element: CommissionData) => {
+            data.push(element)
+          })
+        })
+      }
+      const EraseCol1 = async () => {
+        doc.forEach((doc) => {
+          doc.ref.delete()
+        })
+      }
+      if (!doc.empty) {
+        await EmptyCol1().then(() => EraseCol1())
+      }
+    }
+    if (collectionNames.includes('cleanedData')) {
+      console.log('cleanedData collection exists')
+      const docCol2 = db.collection('cleanedData')
+      const doc2 = await docCol2.get()
+      const EmptyCol2 = async () => {
+        doc2.forEach((doc) => {
+          const docData = doc.data().data
+          const filename = docData.filename ? docData.filename : ''
+          const uploadDateTime = docData.uploadDateTime ? docData.uploadDateTime : ''
+          const user = docData.user ? docData.user : ''
+          mergedResults.push({ filename, uploadDateTime, user })
+          docData.forEach((element: CommissionData) => {
+            data.push(element)
+          })
+        })
+      }
+      const EraseCol2 = async () => {
+        doc2.forEach((doc) => {
+          doc.ref.delete()
+        })
+      }
+      if (!doc2.empty) {
+        await EmptyCol2().then(() => EraseCol2())
+      }
+    }
+    return data
   }
-  doc.forEach((doc) => {
-    doc.ref.delete()
-  })
-
-  const docCol2 = db.collection('cleanedData')
-  if (mergedData.data.length !== 0) {
-    docCol2.add(mergedData)
+  const FilterData = async () => {
+    console.log('filtering data, data.length: ' + data.length)
+    const ids = data.map((o) => o.id)
+    const filtered: CommissionData[] = data.filter(
+      ({ id }, index) => !ids.includes(id, index + 1)
+    )
+    data = filtered
   }
 
-  res.status(200).json(mergedData)
+  const FilterResults = () => {
+    console.log('filtering results, data.length: ' + data.length)
+    mergedResults.reduce((acc: MergedResult[], current: MergedResult) => {
+      const x = acc.find((item: MergedResult) => {
+        item.filename === current.filename &&
+          item.uploadDateTime === current.uploadDateTime &&
+          item.user === current.user
+      })
+      if (!x) {
+        return acc.concat([current])
+      } else {
+        return acc
+      }
+    }, [])
+    return mergedResults
+  }
+  await GetData()
+    .then(() => {
+      data.length > 0 ? FilterData() : null
+    })
+    .then(() => {
+      mergedResults.length > 0 ? FilterResults() : null
+    })
+    .then(() => {
+      const mergedData: MergedData = {
+        data,
+        mergedResults,
+      }
+      db.collection('cleanedData').add(mergedData)
+      res.status(200).json(mergedData)
+    })
+    .catch((error) => {
+      res.status(500).json({ error })
+    })
 }
 
 export default handler

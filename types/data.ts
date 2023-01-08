@@ -42,3 +42,9 @@ export type MergedData = {
   data: CommissionData[]
   mergedResults: MergedResult[]
 }
+
+export type CommissionManagerData = {
+  organization: string
+  salesperson: string
+  commission: number
+}

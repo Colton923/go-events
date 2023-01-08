@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { auth } from '../firebase/firebaseClient'
+import { db } from '../firebase/firebaseClient'
+import { collection, getDocs } from 'firebase/firestore'
 
 import { Grid } from '../components/grid/Grid'
 import { PivotGrid } from '../components/pivotGrid/PivotGrid'
@@ -11,10 +13,12 @@ import type {
   CommissionData,
   PivotCommissionData,
   PivotCommissionTotals,
+  CommissionManagerData,
 } from '../types/data'
 import { Login } from '../components/login/Login'
 import { ExportButton } from '../components/firebaseExport/ExportButton'
 import { ImportFirebaseDataButton } from '../components/importFirebase/ImportFirebaseDataButton'
+import { CommissionGrid } from '../components/commissionGrid/CommissionGrid'
 
 import styles from '../styles/App.module.css'
 
@@ -48,6 +52,25 @@ export default function Index() {
     setRowData(filteredData)
   }
 
+  const [commissionData, setCommissionData] = useState<CommissionManagerData[]>([])
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await getDocs(collection(db, 'commission'))
+      const tempData: CommissionManagerData[] = []
+      const commissionData = data.docs[0].data().data
+      commissionData.forEach((row: any) => {
+        tempData.push({
+          salesperson: row.salesperson,
+          organization: row.organization,
+          commission: row.commission,
+        })
+      })
+
+      setCommissionData(tempData)
+    }
+    fetchData()
+  }, [])
+
   const [pivotData, setPivotData] = useState<PivotCommissionData[]>([])
   const handlePivot = () => {
     const uniqueIDs = [...new Set(rowData.map((row) => row.id))]
@@ -60,11 +83,16 @@ export default function Index() {
         totalEmployee: 0,
       })
     })
-    rowData.forEach((row) => {
-      const index = tempPivotData.findIndex((item) => item.id === row.id)
-      tempPivotData[index].salesperson = row.salesperson
-      tempPivotData[index].organization = row.organization
-      tempPivotData[index].totalEmployee += parseInt(row.totalEmployee)
+    commissionData.forEach((commissionRow) => {
+      rowData.forEach((row) => {
+        if (commissionRow.salesperson === row.salesperson) {
+          const index = tempPivotData.findIndex((item) => item.id === row.id)
+          tempPivotData[index].salesperson = row.salesperson
+          tempPivotData[index].organization = commissionRow.organization
+          tempPivotData[index].totalEmployee +=
+            parseInt(row.totalEmployee) * commissionRow.commission
+        }
+      })
     })
     setPivotData(tempPivotData)
   }
@@ -98,14 +126,20 @@ export default function Index() {
       {loggedIn ? (
         <div className={styles.allCardsWrapper}>
           <div className={styles.cardWrapper}>
+            <h1 className={styles.header}>Commission Data</h1>
+            <div className={styles.gridWrapper}>
+              <CommissionGrid width={screenWidth} />
+            </div>
+          </div>
+          <div className={styles.cardWrapper}>
             <h1 className={styles.header}>CSV Only</h1>
             <div className={styles.buttonWrapper}>
               <ImportCSVButton setRowData={setRowData} setFilename={setFilename} />
             </div>
             <h2 className={styles.header}>File Name: {filename}</h2>
-            <div className={styles.buttonWrapper}>
-              <ExportButton rowData={rowData} filename={filename} user={user} />
-            </div>
+          </div>
+          <div className={styles.cardWrapper}>
+            <h1 className={styles.header}>Import</h1>
             <div className={styles.buttonWrapper}>
               <ImportFirebaseDataButton setRowData={setRowData} user={user} />
             </div>
@@ -116,13 +150,13 @@ export default function Index() {
               <h1 className={styles.subHeader}>Start Date</h1>
               <input
                 className={styles.input}
-                type="text"
+                type="date"
                 onChange={(e) => setStartDate(e.target.value)}
               />
               <h1 className={styles.subHeader}>End Date</h1>
               <input
                 className={styles.input}
-                type="text"
+                type="date"
                 onChange={(e) => setEndDate(e.target.value)}
               />
               <div className={styles.buttonWrapper}>
@@ -130,54 +164,82 @@ export default function Index() {
                   className={styles.input}
                   type="button"
                   value="Date Filter"
-                  onClick={handleDateFilter}
+                  onClick={() => {
+                    handleDateFilter()
+                    handlePivot()
+                    handlePivotTotals()
+                  }}
                 />
               </div>
             </div>
           </div>
-          <div className={styles.cardWrapper}>
-            <div>
-              <h1 className={styles.header}>Pivot Totals</h1>
-              <div className={styles.buttonWrapper}>
-                <input
-                  type="button"
-                  value="Show Totals"
-                  onClick={handlePivotTotals}
-                  className={styles.input}
-                />
-              </div>
-              {pivotTotals
-                ? pivotTotals.map((row, index) => {
-                    return (
-                      <div key={index} className={styles.totalsGrid}>
-                        <h1 className={styles.subHeader}>{row.salesperson}</h1>
-                        <h1 className={styles.subHeader}>{row.totalEmployee}</h1>
+          {rowData.length > 0 ? (
+            <>
+              {pivotData.length > 0 ? (
+                <>
+                  <div className={styles.cardWrapper}>
+                    <div>
+                      <h1 className={styles.header}>Totals</h1>
+                      <div className={styles.buttonWrapper}>
+                        <input
+                          type="button"
+                          value="Refresh"
+                          onClick={handlePivotTotals}
+                          className={styles.input}
+                        />
                       </div>
-                    )
-                  })
-                : null}
-            </div>
-          </div>
-          <div className={styles.cardWrapper}>
-            <div className={styles.gridWrapper}>
-              <h1 className={styles.header}>Pivoted Data Grid</h1>
-              <input
-                className={styles.input}
-                type="button"
-                value="Simple Pivot"
-                onClick={handlePivot}
-              />
-              {pivotData ? (
-                <PivotGrid rowData={pivotData} width={screenWidth} />
+                      {pivotTotals
+                        ? pivotTotals.map((row, index) => {
+                            return (
+                              <div key={index} className={styles.totalsGrid}>
+                                <h1 className={styles.subHeader}>
+                                  {row.salesperson}
+                                </h1>
+                                <h1 className={styles.subHeader}>
+                                  $
+                                  {row.totalEmployee
+                                    .toString()
+                                    .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                                  .00
+                                </h1>
+                              </div>
+                            )
+                          })
+                        : null}
+                    </div>
+                  </div>
+                  <div className={styles.cardWrapper}>
+                    <div className={styles.gridWrapper}>
+                      <h1 className={styles.header}>Pivoted Data Grid</h1>
+                      <PivotGrid rowData={pivotData} width={screenWidth} />
+                    </div>
+                  </div>
+                </>
               ) : null}
-            </div>
-          </div>
-          <div className={styles.cardWrapper}>
-            <div className={styles.gridWrapper}>
-              <h1 className={styles.header}>All Data Grid</h1>
-              {rowData ? <Grid rowData={rowData} width={screenWidth} /> : null}
-            </div>
-          </div>
+
+              <div className={styles.cardWrapper}>
+                <h1 className={styles.header}>All Data Grid</h1>
+                <h1 className={styles.subHeader}>Rows: {rowData.length}</h1>
+                <div className={styles.buttonWrapper}>
+                  <ExportButton rowData={rowData} filename={filename} user={user} />
+                </div>
+                <div className={styles.buttonWrapper}>
+                  <input
+                    className={styles.input}
+                    type="button"
+                    value="Simple Pivot"
+                    onClick={() => {
+                      handlePivot()
+                      handlePivotTotals()
+                    }}
+                  />
+                </div>
+                <div className={styles.gridWrapper}>
+                  <Grid rowData={rowData} width={screenWidth} />
+                </div>
+              </div>
+            </>
+          ) : null}
         </div>
       ) : null}
     </div>
