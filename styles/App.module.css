@@ -39,6 +39,21 @@
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
 }
 
+.menuCard {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 10px;
+  background-color: var(--quaternaryColor);
+
+  width: 100vw;
+
+  border: 1px solid black;
+  border-radius: 5px;
+  padding: 10px;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
+}
 .header {
   display: flex;
   flex-direction: row;
@@ -105,4 +120,24 @@
 
 .input:action {
   transform: scale(1.1);
+}
+
+.disabledInput {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--secondaryColor);
+
+  background-color: #ffffff;
+  opacity: 0.5;
+  border: 1px solid var(--primaryColor);
+  border-radius: 5px;
+}
+
+.disabledInput:hover {
+  transform: scale(1);
 }
