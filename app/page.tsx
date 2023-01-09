@@ -150,7 +150,10 @@ export default function Index() {
               <input
                 type="button"
                 value="Firebase Import"
-                onClick={() => setShowFirebaseImport(!showFirebaseImport)}
+                onClick={() => {
+                  setShowFirebaseGrid(!showFirebaseGrid)
+                  setShowFirebaseImport(!showFirebaseImport)
+                }}
               />
               <input
                 type="button"
