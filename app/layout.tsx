@@ -1,5 +1,7 @@
 import '../styles/global.css'
 
+import styles from '../styles/App.module.css'
+
 interface Props {
   children: React.ReactNode
 }
@@ -16,11 +18,11 @@ export default async function RootLayout({ children }: Props) {
         <meta name="description" content="Go-Events" />
       </head>
       <body style={{ margin: 0 }}>
-        <div>
-          <div>
-            <main>{children}</main>
+        <main>
+          <div className={styles.main}>
+            <div className={styles.allCardsWrapper}>{children}</div>
           </div>
-        </div>
+        </main>
       </body>
     </html>
   )

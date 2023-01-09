@@ -1,7 +1,7 @@
 'use client'
 
 import { ImportFirebaseDataButtonProps } from '../../types/props'
-import type { CommissionData, MergedData } from '../../types/data'
+import type { CommissionData } from '../../types/data'
 import { collection, getDocs } from 'firebase/firestore'
 import { db } from '../../firebase/firebaseClient'
 import styles from '../../styles/App.module.css'
@@ -58,29 +58,34 @@ export const ImportFirebaseDataButton = (props: ImportFirebaseDataButtonProps) =
       setIsDisabled(false)
     })
   }
-
+  if (!props.activeComponent) {
+    return null
+  }
   return (
-    <div>
-      <input
-        className={isDisabled ? styles.disabledInput : styles.input}
-        type="button"
-        value="View Firebase Data"
-        onClick={() => {
-          setIsDisabled(true)
-          handleFirebaseData()
-        }}
-        disabled={isDisabled}
-      />
-      <input
-        className={isDisabled && returnData ? styles.disabledInput : styles.input}
-        type="button"
-        value="Clean Data"
-        onClick={() => {
-          setIsDisabled(true)
-          handleCleanData()
-        }}
-        disabled={isDisabled}
-      />
+    <div className={styles.cardWrapper}>
+      <h1 className={styles.header}>Import</h1>
+      <div className={styles.buttonWrapper}>
+        <input
+          className={isDisabled ? styles.disabledInput : styles.input}
+          type="button"
+          value="View Firebase Data"
+          onClick={() => {
+            setIsDisabled(true)
+            handleFirebaseData()
+          }}
+          disabled={isDisabled}
+        />
+        <input
+          className={isDisabled && returnData ? styles.disabledInput : styles.input}
+          type="button"
+          value="Clean Data"
+          onClick={() => {
+            setIsDisabled(true)
+            handleCleanData()
+          }}
+          disabled={isDisabled}
+        />{' '}
+      </div>
     </div>
   )
 }

@@ -1,30 +1,24 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useAuthState } from 'react-firebase-hooks/auth'
-import { auth } from '../firebase/firebaseClient'
-import { db } from '../firebase/firebaseClient'
-import { collection, getDocs } from 'firebase/firestore'
-
 import { Grid } from '../components/grid/Grid'
 import { PivotGrid } from '../components/pivotGrid/PivotGrid'
 import { ImportCSVButton } from '../components/csvImport/ImportCSVButton'
 import type {
   CommissionData,
   PivotCommissionData,
-  PivotCommissionTotals,
   CommissionManagerData,
 } from '../types/data'
 import { Login } from '../components/login/Login'
-import { ExportButton } from '../components/firebaseExport/ExportButton'
 import { ImportFirebaseDataButton } from '../components/importFirebase/ImportFirebaseDataButton'
 import { CommissionGrid } from '../components/commissionGrid/CommissionGrid'
-
-import styles from '../styles/App.module.css'
+import { DateFilter } from '../components/dateFilter/DateFilter'
+import { PivotTotals } from '../components/pivotTotals/PivotTotals'
+import { Navbar } from '../components/navbar/Navbar'
+import * as Prop from '../types/props'
 
 export default function Index() {
-  const [loggedIn, setLoggedIn] = useState(false)
-  const [user] = useAuthState(auth)
+  const [user, setUser] = useState(null)
   const [screenWidth, setScreenWidth] = useState(0)
   const [filename, setFilename] = useState('')
   const [rowData, setRowData] = useState<CommissionData[]>([])
@@ -35,13 +29,70 @@ export default function Index() {
   const [showPivot, setShowPivot] = useState(false)
   const [showFirebaseGrid, setShowFirebaseGrid] = useState(false)
   const [showPivotTotals, setShowPivotTotals] = useState(false)
+  const [pivotData, setPivotData] = useState<PivotCommissionData[]>([])
+  const [commissionData, setCommissionData] = useState<CommissionManagerData[]>([])
 
-  const FixDecimalNumberToCurrency = (number: number) => {
-    const fixedNumber = number.toFixed(2)
-    const numberWithCommas = fixedNumber.replace(/\d(?=(\d{3})+\.)/g, '$&,')
-    return numberWithCommas
+  const loginProps: Prop.LoginProps = {
+    setUser: setUser,
   }
-
+  const navbarProps: Prop.NavbarProps = {
+    setShowCommissionGrid: setShowCommissionGrid,
+    setShowCSVImport: setShowCSVImport,
+    setShowFirebaseGrid: setShowFirebaseGrid,
+    setShowFirebaseImport: setShowFirebaseImport,
+    setShowDateFilter: setShowDateFilter,
+    setShowPivot: setShowPivot,
+    setShowPivotTotals: setShowPivotTotals,
+    showCommissionGrid: showCommissionGrid,
+    showCSVImport: showCSVImport,
+    showFirebaseGrid: showFirebaseGrid,
+    showFirebaseImport: showFirebaseImport,
+    showDateFilter: showDateFilter,
+    showPivot: showPivot,
+    showPivotTotals: showPivotTotals,
+    user: user,
+  }
+  const gridProps: Prop.GridProps = {
+    rowData: rowData,
+    filename: filename,
+    width: screenWidth,
+    setCommissionData: setCommissionData,
+    commissionData: commissionData,
+    setPivotData: setPivotData,
+    setRowData: setRowData,
+    user: user,
+    activeComponent: showFirebaseGrid,
+    setShowPivot: setShowPivot,
+  }
+  const pivotGridProps: Prop.PivotGridProps = {
+    rowData: pivotData,
+    width: screenWidth,
+    activeComponent: showPivot,
+  }
+  const importCSVButtonProps: Prop.ImportCSVButtonProps = {
+    setRowData: setRowData,
+    setFilename: setFilename,
+    fileName: filename,
+    activeComponent: showCSVImport,
+  }
+  const importFirebaseDataButtonProps: Prop.ImportFirebaseDataButtonProps = {
+    setRowData: setRowData,
+    user: user,
+    activeComponent: showFirebaseImport,
+  }
+  const commissionGridProps: Prop.CommissionGridProps = {
+    width: screenWidth,
+    activeComponent: showCommissionGrid,
+  }
+  const dateFilterProps: Prop.DateFilterProps = {
+    rowData: rowData,
+    setRowData: setRowData,
+    activeComponent: showDateFilter,
+  }
+  const pivotTotalsProps: Prop.PivotTotalsProps = {
+    pivotData: pivotData,
+    activeComponent: showPivotTotals,
+  }
   // Gets the screen width on load and on resize
   useEffect(() => {
     const handleScreenResize = () => {
@@ -53,265 +104,17 @@ export default function Index() {
     return () => window.removeEventListener('resize', handleScreenResize)
   }, [])
 
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
-  const handleDateFilter = () => {
-    const filteredData = rowData.filter((row) => {
-      const rowDate = new Date(row.date)
-      const start = new Date(startDate)
-      const end = new Date(endDate)
-      return rowDate >= start && rowDate <= end
-    })
-    setRowData(filteredData)
-  }
-
-  const [commissionData, setCommissionData] = useState<CommissionManagerData[]>([])
-  useEffect(() => {
-    const fetchData = async () => {
-      const data = await getDocs(collection(db, 'commission'))
-      const tempData: CommissionManagerData[] = []
-      const commissionData = data.docs[0].data().data
-      commissionData.forEach((row: any) => {
-        tempData.push({
-          salesperson: row.salesperson,
-          organization: row.organization,
-          commission: row.commission,
-        })
-      })
-
-      setCommissionData(tempData)
-    }
-    fetchData()
-  }, [])
-
-  const [pivotData, setPivotData] = useState<PivotCommissionData[]>([])
-  const handlePivot = () => {
-    const uniqueIDs = [...new Set(rowData.map((row) => row.id))]
-    const tempPivotData: PivotCommissionData[] = []
-    uniqueIDs.forEach((id) => {
-      tempPivotData.push({
-        salesperson: '',
-        organization: '',
-        id: id,
-        totalEmployee: 0,
-      })
-    })
-    commissionData.forEach((commissionRow) => {
-      rowData.forEach((row) => {
-        if (commissionRow.salesperson === row.salesperson) {
-          const index = tempPivotData.findIndex((item) => item.id === row.id)
-          tempPivotData[index].salesperson = row.salesperson
-          tempPivotData[index].organization = commissionRow.organization
-          console.log(row.totalEvent)
-          console.log(parseInt(row.totalEvent))
-          tempPivotData[index].totalEmployee += parseInt(row.totalEvent)
-          tempPivotData[index].totalEmployee =
-            Math.round(
-              tempPivotData[index].totalEmployee * commissionRow.commission * 100
-            ) / 100
-        }
-      })
-    })
-    setPivotData(tempPivotData)
-  }
-
-  const [pivotTotals, setPivotTotals] = useState<PivotCommissionTotals[]>([])
-  const handlePivotTotals = () => {
-    if (pivotData.length > 0) {
-      const uniqueSalespeople = [...new Set(pivotData.map((row) => row.salesperson))]
-      const tempPivotTotals: PivotCommissionTotals[] = []
-      uniqueSalespeople.forEach((salesperson) => {
-        tempPivotTotals.push({
-          salesperson: salesperson,
-          totalEmployee: 0,
-        })
-      })
-      pivotData.forEach((row) => {
-        const index = tempPivotTotals.findIndex(
-          (item) => item.salesperson === row.salesperson
-        )
-        tempPivotTotals[index].totalEmployee += row.totalEmployee
-        tempPivotTotals[index].totalEmployee =
-          Math.round(tempPivotTotals[index].totalEmployee * 100) / 100
-      })
-      setPivotTotals(tempPivotTotals)
-    }
-  }
-
   return (
-    <div className={styles.main}>
-      <div className={styles.title}>
-        <Login user={user} setLoggedIn={setLoggedIn} />
-      </div>
-      {loggedIn ? (
-        <div className={styles.allCardsWrapper}>
-          <div className={styles.menuCard}>
-            <h1 className={styles.header}>Menu</h1>
-            <div className={styles.buttonWrapper}>
-              <input
-                type="button"
-                value="Commission Grid"
-                onClick={() => setShowCommissionGrid(!showCommissionGrid)}
-              />
-              <input
-                type="button"
-                value="CSV Import"
-                onClick={() => setShowCSVImport(!showCSVImport)}
-              />
-              <input
-                type="button"
-                value="Firebase Import"
-                onClick={() => {
-                  setShowFirebaseGrid(!showFirebaseGrid)
-                  setShowFirebaseImport(!showFirebaseImport)
-                }}
-              />
-              <input
-                type="button"
-                value="Date Filter"
-                onClick={() => setShowDateFilter(!showDateFilter)}
-              />
-              <input
-                type="button"
-                value="Pivot"
-                onClick={() => setShowPivot(!showPivot)}
-              />
-              <input
-                type="button"
-                value="Pivot Totals"
-                onClick={() => setShowPivotTotals(!showPivotTotals)}
-              />
-            </div>
-          </div>
-          {showCommissionGrid && (
-            <div className={styles.cardWrapper}>
-              <h1 className={styles.header}>Commission Data</h1>
-              <div className={styles.gridWrapper}>
-                <CommissionGrid width={screenWidth} />
-              </div>
-            </div>
-          )}
-          {showCSVImport && (
-            <div className={styles.cardWrapper}>
-              <h1 className={styles.header}>CSV Only</h1>
-              <div className={styles.buttonWrapper}>
-                <ImportCSVButton setRowData={setRowData} setFilename={setFilename} />
-              </div>
-              <h2 className={styles.header}>File Name: {filename}</h2>
-            </div>
-          )}
-          {showFirebaseImport && (
-            <div className={styles.cardWrapper}>
-              <h1 className={styles.header}>Import</h1>
-              <div className={styles.buttonWrapper}>
-                <ImportFirebaseDataButton setRowData={setRowData} user={user} />
-              </div>
-            </div>
-          )}
-          {showDateFilter && (
-            <div className={styles.cardWrapper}>
-              <div>
-                <h1 className={styles.header}>Date Filter</h1>
-                <h1 className={styles.subHeader}>Start Date</h1>
-                <input
-                  className={styles.input}
-                  type="date"
-                  onChange={(e) => setStartDate(e.target.value)}
-                />
-                <h1 className={styles.subHeader}>End Date</h1>
-                <input
-                  className={styles.input}
-                  type="date"
-                  onChange={(e) => setEndDate(e.target.value)}
-                />
-                <div className={styles.buttonWrapper}>
-                  <input
-                    className={styles.input}
-                    type="button"
-                    value="Date Filter"
-                    onClick={() => {
-                      handleDateFilter()
-                      handlePivot()
-                      handlePivotTotals()
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-          {rowData.length > 0 ? (
-            <>
-              {pivotData.length > 0
-                ? showPivot && (
-                    <>
-                      <div className={styles.cardWrapper}>
-                        <div>
-                          <h1 className={styles.header}>Totals</h1>
-                          <div className={styles.buttonWrapper}>
-                            <input
-                              type="button"
-                              value="Refresh"
-                              onClick={handlePivotTotals}
-                              className={styles.input}
-                            />
-                          </div>
-                          {pivotTotals
-                            ? pivotTotals.map((row, index) => {
-                                return (
-                                  <div key={index} className={styles.totalsGrid}>
-                                    <h1 className={styles.subHeader}>
-                                      {row.salesperson}
-                                    </h1>
-                                    <h1 className={styles.subHeader}>
-                                      $
-                                      {FixDecimalNumberToCurrency(row.totalEmployee)}
-                                    </h1>
-                                  </div>
-                                )
-                              })
-                            : null}
-                        </div>
-                      </div>
-                      <div className={styles.cardWrapper}>
-                        <div className={styles.gridWrapper}>
-                          <h1 className={styles.header}>Pivoted Data Grid</h1>
-                          <PivotGrid rowData={pivotData} width={screenWidth} />
-                        </div>
-                      </div>
-                    </>
-                  )
-                : null}
-              {showFirebaseGrid && (
-                <div className={styles.cardWrapper}>
-                  <h1 className={styles.header}>All Data Grid</h1>
-                  <h1 className={styles.subHeader}>Rows: {rowData.length}</h1>
-                  <div className={styles.buttonWrapper}>
-                    <ExportButton
-                      rowData={rowData}
-                      filename={filename}
-                      user={user}
-                    />
-                  </div>
-                  <div className={styles.buttonWrapper}>
-                    <input
-                      className={styles.input}
-                      type="button"
-                      value="Simple Pivot"
-                      onClick={() => {
-                        handlePivot()
-                        handlePivotTotals()
-                      }}
-                    />
-                  </div>
-                  <div className={styles.gridWrapper}>
-                    <Grid rowData={rowData} width={screenWidth} />
-                  </div>
-                </div>
-              )}
-            </>
-          ) : null}
-        </div>
-      ) : null}
-    </div>
+    <>
+      <Login {...loginProps} />
+      <Navbar {...navbarProps} />
+      <ImportCSVButton {...importCSVButtonProps} />
+      <ImportFirebaseDataButton {...importFirebaseDataButtonProps} />
+      <DateFilter {...dateFilterProps} />
+      <PivotTotals {...pivotTotalsProps} />
+      <CommissionGrid {...commissionGridProps} />
+      <PivotGrid {...pivotGridProps} />
+      <Grid {...gridProps} />
+    </>
   )
 }

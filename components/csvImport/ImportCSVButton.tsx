@@ -40,15 +40,21 @@ export const ImportCSVButton = (props: ImportCSVButtonProps) => {
     }
     reader.readAsText(file)
   }
-
+  if (!props.activeComponent) {
+    return null
+  }
   return (
-    <div>
-      <input
-        className={styles.input}
-        type="file"
-        onChange={handleFileUpload}
-        accept=".csv"
-      />
+    <div className={styles.cardWrapper}>
+      <h1 className={styles.header}>CSV Only</h1>
+      <div className={styles.buttonWrapper}>
+        <input
+          className={styles.input}
+          type="file"
+          onChange={handleFileUpload}
+          accept=".csv"
+        />
+      </div>
+      <h2 className={styles.header}>File Name: {props.fileName}</h2>
     </div>
   )
 }

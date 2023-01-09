@@ -11,15 +11,14 @@ import styles from '../../styles/App.module.css'
 export const Login = (props: LoginProps) => {
   const [phoneNumber, setPhoneNumber] = useState('')
   const [allUserPhoneNumbers, setAllUserPhoneNumbers] = useState<string[]>([])
-  const [user, setUser] = useState<any>(null)
   const [userLoggedIn] = useAuthState(auth)
   const [userName, setUserName] = useState('')
 
   if (userLoggedIn) {
-    props.setLoggedIn(true)
     const name = MyUserName(userLoggedIn.uid)
     name.then((result) => {
       setUserName(result)
+      props.setUser(userLoggedIn)
     })
   }
 
@@ -53,9 +52,8 @@ export const Login = (props: LoginProps) => {
           if (code) {
             confirmationResult
               .confirm(code)
-              .then((result) => {
-                setUser(result.user)
-                props.setLoggedIn(true)
+              .then(() => {
+                props.setUser(userLoggedIn)
               })
               .catch((error) => {
                 console.log(error)
@@ -68,26 +66,28 @@ export const Login = (props: LoginProps) => {
     }
   }
 
-  if (props.user) {
+  if (userLoggedIn) {
     return <div>Welcome Back {userName}</div>
   } else {
     return (
       <div>
-        <div id="recaptcha-container"></div>
-        <h1>Please Sign In</h1>
-        <input
-          className={styles.input}
-          type="text"
-          id="phone"
-          placeholder="Phone Number"
-          onChange={(e) => setPhoneNumber(e.target.value)}
-        />
-        <input
-          className={styles.input}
-          type="button"
-          value="Sign In"
-          onClick={handleSignIn}
-        />
+        <div className={styles.title}>
+          <div id="recaptcha-container"></div>
+          <h1>Please Sign In</h1>
+          <input
+            className={styles.input}
+            type="text"
+            id="phone"
+            placeholder="Phone Number"
+            onChange={(e) => setPhoneNumber(e.target.value)}
+          />
+          <input
+            className={styles.input}
+            type="button"
+            value="Sign In"
+            onClick={handleSignIn}
+          />
+        </div>
       </div>
     )
   }

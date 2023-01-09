@@ -36,9 +36,11 @@ export const ExportButton = (props: ExportButtonProps) => {
     }
     addData()
   }
-
+  if (!props.activeComponent) {
+    return null
+  }
   return (
-    <div>
+    <div className={styles.buttonWrapper}>
       <input
         className={styles.input}
         type="button"
