@@ -36,6 +36,10 @@ export default function Index() {
   const [showFirebaseGrid, setShowFirebaseGrid] = useState(false)
   const [showPivotTotals, setShowPivotTotals] = useState(false)
 
+  const FixDecimalNumberToCurrency = (number: number) => {
+    return number.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')
+  }
+
   // Gets the screen width on load and on resize
   useEffect(() => {
     const handleScreenResize = () => {
@@ -97,9 +101,9 @@ export default function Index() {
           tempPivotData[index].salesperson = row.salesperson
           tempPivotData[index].organization = commissionRow.organization
           tempPivotData[index].totalEmployee +=
-            Math.round(
-              parseInt(row.totalEmployee) * commissionRow.commission * 100
-            ) / 100
+            parseInt(row.totalEmployee) * commissionRow.commission
+          tempPivotData[index].totalEmployee =
+            Math.round(tempPivotData[index].totalEmployee * 100) / 100
         }
       })
     })
@@ -122,6 +126,8 @@ export default function Index() {
           (item) => item.salesperson === row.salesperson
         )
         tempPivotTotals[index].totalEmployee += row.totalEmployee
+        tempPivotTotals[index].totalEmployee =
+          Math.round(tempPivotTotals[index].totalEmployee * 100) / 100
       })
       setPivotTotals(tempPivotTotals)
     }
@@ -228,49 +234,48 @@ export default function Index() {
               </div>
             </div>
           )}
-          {showPivot && rowData.length > 0 ? (
+          {rowData.length > 0 ? (
             <>
-              {pivotData.length > 0 ? (
-                <>
-                  <div className={styles.cardWrapper}>
-                    <div>
-                      <h1 className={styles.header}>Totals</h1>
-                      <div className={styles.buttonWrapper}>
-                        <input
-                          type="button"
-                          value="Refresh"
-                          onClick={handlePivotTotals}
-                          className={styles.input}
-                        />
+              {pivotData.length > 0
+                ? showPivot && (
+                    <>
+                      <div className={styles.cardWrapper}>
+                        <div>
+                          <h1 className={styles.header}>Totals</h1>
+                          <div className={styles.buttonWrapper}>
+                            <input
+                              type="button"
+                              value="Refresh"
+                              onClick={handlePivotTotals}
+                              className={styles.input}
+                            />
+                          </div>
+                          {pivotTotals
+                            ? pivotTotals.map((row, index) => {
+                                return (
+                                  <div key={index} className={styles.totalsGrid}>
+                                    <h1 className={styles.subHeader}>
+                                      {row.salesperson}
+                                    </h1>
+                                    <h1 className={styles.subHeader}>
+                                      $
+                                      {FixDecimalNumberToCurrency(row.totalEmployee)}
+                                    </h1>
+                                  </div>
+                                )
+                              })
+                            : null}
+                        </div>
                       </div>
-                      {pivotTotals
-                        ? pivotTotals.map((row, index) => {
-                            return (
-                              <div key={index} className={styles.totalsGrid}>
-                                <h1 className={styles.subHeader}>
-                                  {row.salesperson}
-                                </h1>
-                                <h1 className={styles.subHeader}>
-                                  $
-                                  {row.totalEmployee
-                                    .toString()
-                                    .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                                  .00
-                                </h1>
-                              </div>
-                            )
-                          })
-                        : null}
-                    </div>
-                  </div>
-                  <div className={styles.cardWrapper}>
-                    <div className={styles.gridWrapper}>
-                      <h1 className={styles.header}>Pivoted Data Grid</h1>
-                      <PivotGrid rowData={pivotData} width={screenWidth} />
-                    </div>
-                  </div>
-                </>
-              ) : null}
+                      <div className={styles.cardWrapper}>
+                        <div className={styles.gridWrapper}>
+                          <h1 className={styles.header}>Pivoted Data Grid</h1>
+                          <PivotGrid rowData={pivotData} width={screenWidth} />
+                        </div>
+                      </div>
+                    </>
+                  )
+                : null}
               {showFirebaseGrid && (
                 <div className={styles.cardWrapper}>
                   <h1 className={styles.header}>All Data Grid</h1>
