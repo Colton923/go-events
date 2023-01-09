@@ -37,7 +37,9 @@ export default function Index() {
   const [showPivotTotals, setShowPivotTotals] = useState(false)
 
   const FixDecimalNumberToCurrency = (number: number) => {
-    return number.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')
+    const fixedNumber = number.toFixed(2)
+    const numberWithCommas = fixedNumber.replace(/\d(?=(\d{3})+\.)/g, '$&,')
+    return numberWithCommas
   }
 
   // Gets the screen width on load and on resize
@@ -100,10 +102,13 @@ export default function Index() {
           const index = tempPivotData.findIndex((item) => item.id === row.id)
           tempPivotData[index].salesperson = row.salesperson
           tempPivotData[index].organization = commissionRow.organization
-          tempPivotData[index].totalEmployee +=
-            parseInt(row.totalEmployee) * commissionRow.commission
+          console.log(row.totalEvent)
+          console.log(parseInt(row.totalEvent))
+          tempPivotData[index].totalEmployee += parseInt(row.totalEvent)
           tempPivotData[index].totalEmployee =
-            Math.round(tempPivotData[index].totalEmployee * 100) / 100
+            Math.round(
+              tempPivotData[index].totalEmployee * commissionRow.commission * 100
+            ) / 100
         }
       })
     })
