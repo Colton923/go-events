@@ -1,10 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300&display=swap');
 
 :root {
-  --primaryColor: #845ec2;
-  --secondaryColor: #4b4453;
-  --tertiaryColor: #b0a8b9;
-  --quaternaryColor: #ff8066;
+  --primaryColor: #8db49c;
+  --secondaryColor: #003b53;
+  --tertiaryColor: #94afc1;
+  --quaternaryColor: #f1fcf5;
 }
 
 body {

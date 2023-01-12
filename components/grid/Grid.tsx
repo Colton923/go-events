@@ -49,14 +49,54 @@ export const Grid = (props: GridProps) => {
       field: 'organization',
       valueGetter: valueGetter,
     },
-    { headerName: 'Event ID', field: 'id', valueGetter: valueGetter },
-    { headerName: 'Event Date', field: 'date', valueGetter: valueGetter },
-    { headerName: 'Assigned Employee', field: 'employee', valueGetter: valueGetter },
-    { headerName: 'Status', field: 'status', valueGetter: valueGetter },
-    { headerName: 'Salesperson', field: 'salesperson', valueGetter: valueGetter },
-    { headerName: 'Action Date', field: 'actionDate', valueGetter: valueGetter },
-    { headerName: 'Next Action', field: 'nextAction', valueGetter: valueGetter },
-    { headerName: 'Total Fee', field: 'totalFee', valueGetter: valueGetter },
+    {
+      headerName: 'Event ID',
+      field: 'id',
+      valueGetter: valueGetter,
+      filter: 'number',
+    },
+    {
+      headerName: 'Event Date',
+      field: 'date',
+      valueGetter: valueGetter,
+      filter: 'date',
+    },
+    {
+      headerName: 'Assigned Employee',
+      field: 'employee',
+      valueGetter: valueGetter,
+      filter: 'text',
+    },
+    {
+      headerName: 'Status',
+      field: 'status',
+      valueGetter: valueGetter,
+      filter: 'text',
+    },
+    {
+      headerName: 'Salesperson',
+      field: 'salesperson',
+      valueGetter: valueGetter,
+      filter: 'text',
+    },
+    {
+      headerName: 'Action Date',
+      field: 'actionDate',
+      valueGetter: valueGetter,
+      filter: 'date',
+    },
+    {
+      headerName: 'Next Action',
+      field: 'nextAction',
+      valueGetter: valueGetter,
+      filter: 'text',
+    },
+    {
+      headerName: 'Total Fee',
+      field: 'totalFee',
+      valueGetter: valueGetter,
+      filter: 'number',
+    },
     {
       headerName: 'Employee Wage Total',
       field: 'totalEmployee',
@@ -139,7 +179,7 @@ export const Grid = (props: GridProps) => {
         />
       </div>
       <div className={styles.gridWrapper}>
-        <div className="ag-theme-alpine" style={{ height: 500, width: props.width }}>
+        <div className="ag-theme-alpine" style={{ height: 500, width: props.width * .9}}>
           <AgGridReact
             //@ts-ignore
             ref={gridRef}

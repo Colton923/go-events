@@ -50,7 +50,7 @@ export const CommissionGrid = (props: CommissionGridProps) => {
   const valueGetter = (params: any) => {
     return params.data[params.colDef.field]
   }
-  // I need a valueSetter function here
+
   const valueSetter = (params: any) => {
     params.data[params.colDef.field] = params.newValue
     UpdateDB(params.data.salesperson, params.newValue, params.data.organization)
@@ -118,7 +118,7 @@ export const CommissionGrid = (props: CommissionGridProps) => {
     <div className={styles.cardWrapper}>
       <h1 className={styles.header}>Commission Data</h1>
       <div className={styles.gridWrapper}>
-        <div className="ag-theme-alpine" style={{ height: 500, width: props.width }}>
+        <div className="ag-theme-alpine" style={{ height: 500, width: props.width * .9 }}>
           <AgGridReact
             //@ts-ignore
             ref={gridRef}

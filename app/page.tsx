@@ -1,24 +1,29 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Grid } from '../components/grid/Grid'
-import { PivotGrid } from '../components/pivotGrid/PivotGrid'
-import { ImportCSVButton } from '../components/csvImport/ImportCSVButton'
 import type {
   CommissionData,
   PivotCommissionData,
   CommissionManagerData,
 } from '../types/data'
+
+import * as Prop from '../types/props'
 import { Login } from '../components/login/Login'
+import { Grid } from '../components/grid/Grid'
+import { ImportCSVButton } from '../components/csvImport/ImportCSVButton'
+import { EmployeeGrid } from '../components/employeeGrid/EmployeeGrid'
+import { Navbar } from '../components/navbar/Navbar'
+import { PivotGrid } from '../components/pivotGrid/PivotGrid'
+import { PivotTotals } from '../components/pivotTotals/PivotTotals'
 import { ImportFirebaseDataButton } from '../components/importFirebase/ImportFirebaseDataButton'
 import { CommissionGrid } from '../components/commissionGrid/CommissionGrid'
-import { DateFilter } from '../components/dateFilter/DateFilter'
-import { PivotTotals } from '../components/pivotTotals/PivotTotals'
-import { Navbar } from '../components/navbar/Navbar'
-import * as Prop from '../types/props'
+import { auth } from '../firebase/firebaseClient'
+import { useAuthState } from 'react-firebase-hooks/auth'
+import { AddNewEmployee } from '../components/addNewEmployee/AddNewEmployee'
 
 export default function Index() {
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState<any>(null)
+  const [userName, setUserName] = useState('')
   const [screenWidth, setScreenWidth] = useState(0)
   const [filename, setFilename] = useState('')
   const [rowData, setRowData] = useState<CommissionData[]>([])
@@ -31,8 +36,12 @@ export default function Index() {
   const [showPivotTotals, setShowPivotTotals] = useState(false)
   const [pivotData, setPivotData] = useState<PivotCommissionData[]>([])
   const [commissionData, setCommissionData] = useState<CommissionManagerData[]>([])
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [authUser, authLoading, authError] = useAuthState(auth)
+  const [showAddNewEmployee, setShowAddNewEmployee] = useState(false)
 
   const loginProps: Prop.LoginProps = {
+    setUserName: setUserName,
     setUser: setUser,
   }
   const navbarProps: Prop.NavbarProps = {
@@ -43,6 +52,8 @@ export default function Index() {
     setShowDateFilter: setShowDateFilter,
     setShowPivot: setShowPivot,
     setShowPivotTotals: setShowPivotTotals,
+    setShowAddNewEmployee: setShowAddNewEmployee,
+    showAddNewEmployee: showAddNewEmployee,
     showCommissionGrid: showCommissionGrid,
     showCSVImport: showCSVImport,
     showFirebaseGrid: showFirebaseGrid,
@@ -84,15 +95,20 @@ export default function Index() {
     width: screenWidth,
     activeComponent: showCommissionGrid,
   }
-  const dateFilterProps: Prop.DateFilterProps = {
-    rowData: rowData,
-    setRowData: setRowData,
-    activeComponent: showDateFilter,
-  }
   const pivotTotalsProps: Prop.PivotTotalsProps = {
     pivotData: pivotData,
     activeComponent: showPivotTotals,
   }
+  const employeeGridProps: Prop.EmployeeGridProps = {
+    width: screenWidth,
+    uid: user ? user.uid : '',
+    activeComponent: !isAdmin,
+    userName: userName,
+  }
+  const addNewEmployeeProps: Prop.AddNewEmployeeProps = {
+    activeComponent: showAddNewEmployee,
+  }
+
   // Gets the screen width on load and on resize
   useEffect(() => {
     const handleScreenResize = () => {
@@ -104,17 +120,41 @@ export default function Index() {
     return () => window.removeEventListener('resize', handleScreenResize)
   }, [])
 
+  // Checks if the user is an admin
+  useEffect(() => {
+    if (user) {
+      if (
+        user.uid === process.env.NEXT_PUBLIC_FIREBASE_ADMIN_COLTON ||
+        user.uid === process.env.NEXT_PUBLIC_FIREBASE_ADMIN_FRANK
+      ) {
+        setIsAdmin(true)
+      }
+    }
+  }, [user, authUser])
+
+  if (authLoading) return <div>Loading...</div>
+
+  if (authError) return <div>Error: {authError.message}</div>
+
   return (
     <>
       <Login {...loginProps} />
-      <Navbar {...navbarProps} />
-      <ImportCSVButton {...importCSVButtonProps} />
-      <ImportFirebaseDataButton {...importFirebaseDataButtonProps} />
-      <DateFilter {...dateFilterProps} />
-      <PivotTotals {...pivotTotalsProps} />
-      <CommissionGrid {...commissionGridProps} />
-      <PivotGrid {...pivotGridProps} />
-      <Grid {...gridProps} />
+      {isAdmin ? (
+        <>
+          <Navbar {...navbarProps} />
+          <ImportCSVButton {...importCSVButtonProps} />
+          <ImportFirebaseDataButton {...importFirebaseDataButtonProps} />
+          <PivotTotals {...pivotTotalsProps} />
+          <CommissionGrid {...commissionGridProps} />
+          <PivotGrid {...pivotGridProps} />
+          <Grid {...gridProps} />
+          <AddNewEmployee {...addNewEmployeeProps} />
+        </>
+      ) : (
+        <>
+          <EmployeeGrid {...employeeGridProps} />
+        </>
+      )}
     </>
   )
 }

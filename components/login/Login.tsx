@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth'
-import { auth } from '../../firebase/firebaseClient'
+import { auth, db } from '../../firebase/firebaseClient'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { LoginProps } from '../../types/props'
 import { MyUserName } from '../../firebase/myUserName'
 import styles from '../../styles/App.module.css'
+import { setDoc, collection, getDocs, deleteDoc, doc} from 'firebase/firestore'
 
 export const Login = (props: LoginProps) => {
   const [phoneNumber, setPhoneNumber] = useState('')
@@ -19,6 +20,7 @@ export const Login = (props: LoginProps) => {
     name.then((result) => {
       setUserName(result)
       props.setUser(userLoggedIn)
+      props.setUserName(result)
     })
   }
 
@@ -48,16 +50,44 @@ export const Login = (props: LoginProps) => {
       )
       signInWithPhoneNumber(auth, phone, reCaptchaVerifier).then(
         (confirmationResult) => {
-          const code = prompt('Enter the code you received via SMS:')
-          if (code) {
+          if (phone === process.env.NEXT_PUBLIC_FIREBASE_AUTH_TEST_PHONE) {
             confirmationResult
-              .confirm(code)
-              .then(() => {
+              //@ts-ignore
+              .confirm(process.env.NEXT_PUBLIC_FIREBASE_AUTH_TEST_PHONE_CODE)
+              .then((result) => {
+                const userLoggedIn = result.user
+                let thisName = ''
+                console.log(userLoggedIn.uid)
+                const uid = userLoggedIn.uid
+                const oldrefCol = collection(db, 'users')
+                getDocs(oldrefCol).then((querySnapshot) => {
+                  querySnapshot.forEach((doc) => {
+                    if (doc.data().phone === phone) {
+                      thisName = doc.data().name
+                      deleteDoc(doc.ref)
+                    }
+                  })
+                  const newDoc = doc(oldrefCol, uid)
+                  setDoc(newDoc, {phone: phone, name: thisName})
+              }).then(() => {
                 props.setUser(userLoggedIn)
               })
+            })
               .catch((error) => {
                 console.log(error)
               })
+          } else {
+            const code = prompt('Enter the code you received via SMS:')
+            if (code) {
+              confirmationResult
+                .confirm(code)
+                .then(() => {
+                  props.setUser(userLoggedIn)
+                })
+                .catch((error) => {
+                  console.log(error)
+                })
+            }
           }
         }
       )
@@ -67,7 +97,11 @@ export const Login = (props: LoginProps) => {
   }
 
   if (userLoggedIn) {
-    return <div>Welcome Back {userName}</div>
+    return (
+      <div>
+        <div>Welcome Back {userName}</div>
+      </div>
+    )
   } else {
     return (
       <div>

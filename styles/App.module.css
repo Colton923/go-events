@@ -3,6 +3,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  width: 95vw;
 }
 
 .title {
@@ -23,6 +24,7 @@
   align-items: center;
   flex-wrap: wrap;
   margin: 10px;
+  width: 90vw;
 }
 
 .cardWrapper {
@@ -31,7 +33,9 @@
   justify-content: center;
   align-items: center;
   margin: 10px;
-  background-color: var(--quaternaryColor);
+  background-color: var(--tertiaryColor);
+  min-width: 300px;
+  min-height: 300px;
 
   border: 1px solid black;
   border-radius: 5px;
@@ -45,7 +49,7 @@
   justify-content: center;
   align-items: center;
   margin: 10px;
-  background-color: var(--quaternaryColor);
+  background-color: var(--tertiaryColor);
 
   width: 100vw;
 
@@ -79,9 +83,13 @@
 .totalsGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
+  grid-template-rows: 1fr;
   grid-gap: 2px;
   margin: 0;
+
+  width: 100%;
+
+  justify-items: flex-end;
 }
 
 .gridWrapper {
@@ -109,17 +117,17 @@
   font-weight: 400;
   color: var(--secondaryColor);
 
-  background-color: #ffffff;
-  border: 1px solid var(--primaryColor);
+  background-color: var(--quaternaryColor);
+  border: 1px solid var(--secondaryColor);
   border-radius: 5px;
 }
 
 .input:hover {
-  transform: scale(1.1);
+  transform: scale(0.95);
 }
 
 .input:action {
-  transform: scale(1.1);
+  transform: scale(0.95);
 }
 
 .disabledInput {
@@ -140,4 +148,19 @@
 
 .disabledInput:hover {
   transform: scale(1);
+}
+
+.signOutWrapper {
+  display: inline-block;
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  margin: 10px;
+  background-color: var(--tertiaryColor);
+
+  border: 1px solid black;
+  border-radius: 5px;
+  padding: 10px;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
 }

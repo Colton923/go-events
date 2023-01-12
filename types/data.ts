@@ -20,6 +20,14 @@ export type PivotCommissionData = {
   totalEmployee: number
 }
 
+export type EmployeeData = {
+  salesperson: string
+  organization: string
+  id: string
+  totalEvent: number
+  actionDate: string
+}
+
 export type PivotCommissionTotals = {
   salesperson: string
   totalEmployee: number

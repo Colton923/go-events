@@ -12,6 +12,7 @@ export interface GridProps {
   activeComponent: boolean
   setShowPivot: (showPivot: boolean) => void
 }
+
 export interface CommissionGridProps {
   width: number
   activeComponent: boolean
@@ -26,6 +27,7 @@ export interface ImportCSVButtonProps {
 
 export interface LoginProps {
   setUser: (user: any) => void
+  setUserName: (userName: string) => void
 }
 
 export interface ExportButtonProps {
@@ -45,6 +47,13 @@ export interface PivotGridProps {
   rowData: PivotCommissionData[]
   width: number
   activeComponent: boolean
+}
+
+export interface EmployeeGridProps {
+  width: number
+  uid: string
+  activeComponent: boolean
+  userName: string
 }
 
 export interface CommissionManagerProps {
@@ -70,6 +79,8 @@ export interface NavbarProps {
   setShowDateFilter: (showDateFilter: boolean) => void
   setShowPivot: (showPivot: boolean) => void
   setShowPivotTotals: (showPivotTotals: boolean) => void
+  setShowAddNewEmployee: (showAddNewEmployee: boolean) => void
+  showAddNewEmployee: boolean
   showCommissionGrid: boolean
   showCSVImport: boolean
   showFirebaseGrid: boolean
@@ -78,4 +89,8 @@ export interface NavbarProps {
   showPivot: boolean
   showPivotTotals: boolean
   user: any
+}
+
+export interface AddNewEmployeeProps {
+  activeComponent: boolean
 }

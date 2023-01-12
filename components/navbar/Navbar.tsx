@@ -1,5 +1,8 @@
+'use client'
+
 import styles from '../../styles/App.module.css'
 import { NavbarProps } from '../../types/props'
+import { auth } from '../../firebase/firebaseClient'
 
 export const Navbar = (props: NavbarProps) => {
   if (!props.user) {
@@ -9,6 +12,12 @@ export const Navbar = (props: NavbarProps) => {
     <div className={styles.menuCard}>
       <h1 className={styles.header}>Menu</h1>
       <div className={styles.buttonWrapper}>
+        <input
+          type="button"
+          value="Add New Employee"
+          onClick={() => props.setShowAddNewEmployee(!props.showAddNewEmployee)}
+          className={styles.input}
+        />
         <input
           type="button"
           value="Commission Grid"
@@ -48,6 +57,9 @@ export const Navbar = (props: NavbarProps) => {
           onClick={() => props.setShowPivotTotals(!props.showPivotTotals)}
           className={styles.input}
         />
+        <div>
+        <input type="button" className={styles.input} onClick={() => auth.signOut()} value={'Sign Out'}/>
+        </div>
       </div>
     </div>
   )

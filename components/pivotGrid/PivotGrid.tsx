@@ -59,7 +59,7 @@ export const PivotGrid = (props: PivotGridProps) => {
     <div className={styles.cardWrapper}>
       <div className={styles.gridWrapper}>
         <h1 className={styles.header}>Pivoted Data Grid</h1>
-        <div className="ag-theme-alpine" style={{ height: 500, width: props.width }}>
+        <div className="ag-theme-alpine" style={{ height: 500, width: props.width * .9}}>
           <AgGridReact
             //@ts-ignore
             ref={gridRef}
