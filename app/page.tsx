@@ -120,6 +120,7 @@ export default function Index() {
     return () => window.removeEventListener('resize', handleScreenResize)
   }, [])
 
+
   // Checks if the user is an admin
   useEffect(() => {
     if (user) {
