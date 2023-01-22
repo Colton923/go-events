@@ -7,7 +7,7 @@ import { useAuthState } from 'react-firebase-hooks/auth'
 import { LoginProps } from '../../types/props'
 import { MyUserName } from '../../firebase/myUserName'
 import styles from '../../styles/App.module.css'
-import { setDoc, collection, getDocs, deleteDoc, doc} from 'firebase/firestore'
+import { setDoc, collection, getDocs, deleteDoc, doc } from 'firebase/firestore'
 
 export const Login = (props: LoginProps) => {
   const [phoneNumber, setPhoneNumber] = useState('')
@@ -60,19 +60,21 @@ export const Login = (props: LoginProps) => {
                 console.log(userLoggedIn.uid)
                 const uid = userLoggedIn.uid
                 const oldrefCol = collection(db, 'users')
-                getDocs(oldrefCol).then((querySnapshot) => {
-                  querySnapshot.forEach((doc) => {
-                    if (doc.data().phone === phone) {
-                      thisName = doc.data().name
-                      deleteDoc(doc.ref)
-                    }
+                getDocs(oldrefCol)
+                  .then((querySnapshot) => {
+                    querySnapshot.forEach((doc) => {
+                      if (doc.data().phone === phone) {
+                        thisName = doc.data().name
+                        deleteDoc(doc.ref)
+                      }
+                    })
+                    const newDoc = doc(oldrefCol, uid)
+                    setDoc(newDoc, { phone: phone, name: thisName })
                   })
-                  const newDoc = doc(oldrefCol, uid)
-                  setDoc(newDoc, {phone: phone, name: thisName})
-              }).then(() => {
-                props.setUser(userLoggedIn)
+                  .then(() => {
+                    props.setUser(userLoggedIn)
+                  })
               })
-            })
               .catch((error) => {
                 console.log(error)
               })
@@ -98,16 +100,18 @@ export const Login = (props: LoginProps) => {
 
   if (userLoggedIn) {
     return (
-      <div>
-        <div>Welcome Back {userName}</div>
+      <div className={styles.main}>
+        <div className={styles.subHeader}>
+          <h1>Welcome Back {userName}</h1>
+        </div>
       </div>
     )
   } else {
     return (
-      <div>
+      <div className={styles.main}>
         <div className={styles.title}>
           <div id="recaptcha-container"></div>
-          <h1>Please Sign In</h1>
+          <h1 className={styles.bigText}>Please Sign In</h1>
           <input
             className={styles.input}
             type="text"

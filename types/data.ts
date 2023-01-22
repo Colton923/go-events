@@ -17,15 +17,18 @@ export type PivotCommissionData = {
   salesperson: string
   organization: string
   id: string
+  actionDate: string
   totalEmployee: number
+  totalEvent: number
 }
 
 export type EmployeeData = {
   salesperson: string
   organization: string
   id: string
-  totalEvent: number
   actionDate: string
+  eventProfit: number
+  totalEvent: number
 }
 
 export type PivotCommissionTotals = {

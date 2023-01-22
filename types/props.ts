@@ -16,6 +16,7 @@ export interface GridProps {
 export interface CommissionGridProps {
   width: number
   activeComponent: boolean
+  rowData: CommissionData[]
 }
 
 export interface ImportCSVButtonProps {

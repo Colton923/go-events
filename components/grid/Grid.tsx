@@ -96,16 +96,25 @@ export const Grid = (props: GridProps) => {
       field: 'totalFee',
       valueGetter: valueGetter,
       filter: 'number',
+      valueFormatter: (params: any) => {
+        return `$${parseInt(params.value).toFixed(2)}`
+      },
     },
     {
       headerName: 'Employee Wage Total',
       field: 'totalEmployee',
       valueGetter: valueGetter,
+      valueFormatter: (params: any) => {
+        return `$${parseInt(params.value).toFixed(2)}`
+      },
     },
     {
       headerName: 'Event Net Profit',
       field: 'totalEvent',
       valueGetter: valueGetter,
+      valueFormatter: (params: any) => {
+        return `$${parseInt(params.value).toFixed(2)}`
+      },
     },
   ] as ColDef<CommissionData>[]
 
@@ -120,7 +129,7 @@ export const Grid = (props: GridProps) => {
   const defaultColDef = useMemo(
     () => ({
       flex: 1,
-      minWidth: 100,
+      minWidth: 200,
       resizable: true,
       sortable: true,
     }),
@@ -136,22 +145,34 @@ export const Grid = (props: GridProps) => {
         organization: '',
         id: id,
         totalEmployee: 0,
+        totalEvent: 0,
+        actionDate: '',
       })
     })
-    props.commissionData.forEach((commissionRow) => {
-      props.rowData.forEach((row) => {
-        if (commissionRow.salesperson === row.salesperson) {
-          const index = tempPivotData.findIndex((item) => item.id === row.id)
-          tempPivotData[index].salesperson = row.salesperson
-          tempPivotData[index].organization = commissionRow.organization
-          tempPivotData[index].totalEmployee += parseInt(row.totalEvent)
-          tempPivotData[index].totalEmployee =
-            Math.round(
-              tempPivotData[index].totalEmployee * commissionRow.commission * 100
-            ) / 100
+
+    tempPivotData.reduce((acc, cur) => {
+      props.rowData.reduce((acc, cur) => {
+        if (cur.id === acc.id) {
+          acc.totalEvent += parseInt(cur.totalEvent)
+          acc.actionDate = cur.actionDate
+          acc.actionDate = cur.actionDate
+          acc.organization = cur.organization
+          acc.salesperson = cur.salesperson
         }
-      })
-    })
+        return acc
+      }, cur)
+      props.commissionData.reduce((acc, cur) => {
+        if (
+          cur.salesperson === acc.salesperson &&
+          cur.organization === acc.organization
+        ) {
+          acc.totalEmployee = Math.round(cur.commission * acc.totalEvent * 100) / 100
+          acc.organization = cur.organization
+        }
+        return acc
+      }, cur)
+      return acc
+    }, [])
     props.setPivotData(tempPivotData)
     props.setShowPivot(true)
   }
@@ -179,7 +200,10 @@ export const Grid = (props: GridProps) => {
         />
       </div>
       <div className={styles.gridWrapper}>
-        <div className="ag-theme-alpine" style={{ height: 500, width: props.width * .9}}>
+        <div
+          className="ag-theme-alpine"
+          style={{ height: 500, width: props.width * 1 }}
+        >
           <AgGridReact
             //@ts-ignore
             ref={gridRef}

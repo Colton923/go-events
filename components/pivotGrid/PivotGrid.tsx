@@ -19,7 +19,7 @@ export const PivotGrid = (props: PivotGridProps) => {
   const defaultColDef = useMemo(
     () => ({
       flex: 1,
-      minWidth: 100,
+      minWidth: 200,
       resizable: true,
       sortable: true,
     }),
@@ -38,10 +38,22 @@ export const PivotGrid = (props: PivotGridProps) => {
       valueGetter: valueGetter,
     },
     { headerName: 'Event ID', field: 'id', valueGetter: valueGetter },
+    { headerName: 'Event Date', field: 'actionDate', valueGetter: valueGetter },
     {
       headerName: 'Employee Wage Total',
       field: 'totalEmployee',
       valueGetter: valueGetter,
+      valueFormatter: (params: any) => {
+        return `$${params.value.toFixed(2)}`
+      },
+    },
+    {
+      headerName: 'Event Net Profit',
+      field: 'totalEvent',
+      valueGetter: valueGetter,
+      valueFormatter: (params: any) => {
+        return `$${params.value.toFixed(2)}`
+      },
     },
   ] as ColDef<PivotCommissionData>[]
 
@@ -59,7 +71,10 @@ export const PivotGrid = (props: PivotGridProps) => {
     <div className={styles.cardWrapper}>
       <div className={styles.gridWrapper}>
         <h1 className={styles.header}>Pivoted Data Grid</h1>
-        <div className="ag-theme-alpine" style={{ height: 500, width: props.width * .9}}>
+        <div
+          className="ag-theme-alpine"
+          style={{ height: 500, width: props.width * 1 }}
+        >
           <AgGridReact
             //@ts-ignore
             ref={gridRef}

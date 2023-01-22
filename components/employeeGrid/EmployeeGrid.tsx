@@ -67,6 +67,7 @@ export const EmployeeGrid = (props: EmployeeGridProps) => {
       const dataCol = collection(db, 'data')
       const querySnapshot = await getDocs(dataCol)
       let thisTotal = 0
+      let thisEvent = 0
       querySnapshot.forEach((doc) => {
         const data = doc.data().data
         data.forEach((row: EmployeeData) => {
@@ -82,6 +83,7 @@ export const EmployeeGrid = (props: EmployeeGridProps) => {
               totalEvent: 0,
               actionDate: row.actionDate,
               salesperson: row.salesperson,
+              eventProfit: 0,
             }
 
             employeeCommission.findIndex((commission) => {
@@ -93,6 +95,10 @@ export const EmployeeGrid = (props: EmployeeGridProps) => {
                   Math.round(commission.commission * row.totalEvent * 100) / 100
                 thisTotal += EventCash
                 tempRow.totalEvent = EventCash
+
+                const EventProfit = Math.round(row.totalEvent * 100) / 100
+                thisEvent += EventProfit
+                tempRow.eventProfit = EventProfit
                 return true
               }
               return false
@@ -132,7 +138,7 @@ export const EmployeeGrid = (props: EmployeeGridProps) => {
   const defaultColDef = useMemo(
     () => ({
       flex: 1,
-      minWidth: 100,
+      minWidth: 150,
       resizable: true,
       sortable: true,
     }),
@@ -149,23 +155,41 @@ export const EmployeeGrid = (props: EmployeeGridProps) => {
       field: 'organization',
       valueGetter: valueGetter,
       filter: 'text',
-      flex: 1,
     },
     {
       headerName: 'Event ID',
       field: 'id',
       valueGetter: valueGetter,
       filter: 'text',
-      flex: 1,
+    },
+    {
+      headerName: 'Event Date',
+      field: 'actionDate',
+      valueGetter: valueGetter,
+      filter: 'text',
+    },
+    {
+      headerName: 'Event Net Profit',
+      field: 'eventProfit',
+      valueGetter: valueGetter,
+      filter: 'text',
+      valueFormatter: (params: any) => {
+        if (typeof params.value === 'number') {
+          return `$${params.value.toFixed(2)}`
+        }
+        return params.value
+      },
     },
     {
       headerName: 'Commission',
       field: 'totalEvent',
       valueGetter: valueGetter,
       filter: 'text',
-      flex: 1,
       valueFormatter: (params: any) => {
-        return `$${params.value}`
+        if (typeof params.value === 'number') {
+          return `$${params.value.toFixed(2)}`
+        }
+        return params.value
       },
     },
   ] as ColDef<EmployeeData>[]
@@ -198,7 +222,7 @@ export const EmployeeGrid = (props: EmployeeGridProps) => {
         </div>
       ) : (
         <>
-          <div className={styles.signOutWrapper} >
+          <div className={styles.signOutWrapper}>
             <input
               type="button"
               className={styles.input}
@@ -209,7 +233,6 @@ export const EmployeeGrid = (props: EmployeeGridProps) => {
             />
           </div>
           <div className={styles.cardWrapper}>
-
             <div className={styles.gridWrapper}>
               <h1 className={styles.header}>Date Filter</h1>
               <input
@@ -250,7 +273,7 @@ export const EmployeeGrid = (props: EmployeeGridProps) => {
             <div className={styles.gridWrapper}>
               <h1 className={styles.header}>Total Commission</h1>
               <h1 className={styles.header}>
-                {`$${total}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                {`$${total.toFixed(2)}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
               </h1>
             </div>
           </div>
@@ -260,7 +283,7 @@ export const EmployeeGrid = (props: EmployeeGridProps) => {
               <h1 className={styles.header}>Commission Report</h1>
               <div
                 className="ag-theme-alpine"
-                style={{ height: 500, width: props.width * 0.9 }}
+                style={{ height: 500, width: props.width * 1 }}
               >
                 <AgGridReact
                   //@ts-ignore

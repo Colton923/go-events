@@ -94,6 +94,7 @@ export default function Index() {
   const commissionGridProps: Prop.CommissionGridProps = {
     width: screenWidth,
     activeComponent: showCommissionGrid,
+    rowData: rowData,
   }
   const pivotTotalsProps: Prop.PivotTotalsProps = {
     pivotData: pivotData,
@@ -119,7 +120,6 @@ export default function Index() {
     handleScreenResize()
     return () => window.removeEventListener('resize', handleScreenResize)
   }, [])
-
 
   // Checks if the user is an admin
   useEffect(() => {

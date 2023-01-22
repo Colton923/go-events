@@ -17,6 +17,10 @@ export const ImportFirebaseDataButton = (props: ImportFirebaseDataButtonProps) =
     }
   }, [returnData])
 
+  useEffect(() => {
+    handleFirebaseData()
+  }, [])
+
   const handleCleanData = () => {
     if (!returnData) return
     const cleanData: CommissionData[] = []
@@ -57,6 +61,8 @@ export const ImportFirebaseDataButton = (props: ImportFirebaseDataButtonProps) =
               ' duplicate rows, attempting removal from database'
           )
           handleRemoveData(dirtyData)
+        } else {
+          alert('No duplicate rows found')
         }
       })
       .then(() => {
@@ -93,6 +99,7 @@ export const ImportFirebaseDataButton = (props: ImportFirebaseDataButtonProps) =
             if (index > -1) {
               count += 1
               data.splice(index, 1)
+              dirtyData.splice(dirtyData.indexOf(row), 1)
             }
           })
           if (count > 0) {

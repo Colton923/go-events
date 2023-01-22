@@ -16,29 +16,86 @@ export const CommissionGrid = (props: CommissionGridProps) => {
   const [commissionData, setCommissionData] = useState<CommissionManagerData[]>([])
   const [gridApi, setGridApi] = useState(null)
   const [gridColumnApi, setGridColumnApi] = useState(null)
+  const [commissionValue, setCommissionValue] = useState(0)
 
   useEffect(() => {
+    if (!props.activeComponent) return
     const fetchData = async () => {
+      const tempOrg = props.rowData.map((row) => {
+        return row.organization
+      })
+      const uniqueEmployees = props.rowData.map((row) => {
+        return row.salesperson
+      })
+
+      let matches = 0
       const data = await getDocs(collection(db, 'commission'))
       const tempData: CommissionManagerData[] = []
+      const newMatch: CommissionManagerData[] = []
       const commissionData = data.docs[0].data().data
+
       commissionData.forEach((row: any) => {
-        tempData.push({
-          salesperson: row.salesperson,
-          organization: row.organization,
-          commission: row.commission,
-        })
+        if (
+          uniqueEmployees.includes(row.salesperson) &&
+          tempOrg.includes(row.organization)
+        ) {
+          tempData.push({
+            salesperson: row.salesperson,
+            organization: row.organization,
+            commission: row.commission,
+          })
+        } else {
+          matches++
+          const findEmployee = uniqueEmployees.reduce((acc, curr) => {
+            if (curr !== row.salesperson) {
+              return curr
+            }
+            return acc
+          }, '')
+
+          const findOrganization = tempOrg.reduce((acc, curr) => {
+            if (curr !== row.organization) {
+              return curr
+            }
+            return acc
+          }, '')
+
+          tempData.push({
+            salesperson: findEmployee,
+            organization: findOrganization,
+            commission: 0.4,
+          })
+          newMatch.push({
+            salesperson: row.salesperson,
+            organization: row.organization,
+            commission: row.commission,
+          })
+        }
       })
+
+      if (matches > 0) {
+        try {
+          fetch('/api/firebase/post/manager', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(tempData),
+          })
+        } catch (error) {
+          console.log(error)
+        }
+      }
 
       setCommissionData(tempData)
     }
     fetchData()
-  }, [])
+  }, [props.activeComponent])
 
   const defaultColDef = useMemo(
     () => ({
       flex: 1,
-      minWidth: 100,
+      minWidth: 200,
       resizable: true,
       sortable: true,
     }),
@@ -81,6 +138,19 @@ export const CommissionGrid = (props: CommissionGridProps) => {
     }
   }
 
+  const handleMultiSet = () => {
+    const selectedRows: any = []
+    //@ts-ignore
+    gridApi.forEachNodeAfterFilter((node) => {
+      selectedRows.push(node.data)
+    })
+
+    selectedRows.forEach((row: any) => {
+      row.commission = commissionValue
+      UpdateDB(row.salesperson, commissionValue, row.organization)
+    })
+  }
+
   const columnDefs = [
     {
       headerName: 'Salesperson',
@@ -117,8 +187,25 @@ export const CommissionGrid = (props: CommissionGridProps) => {
   return (
     <div className={styles.cardWrapper}>
       <h1 className={styles.header}>Commission Data</h1>
+      <input
+        type="text"
+        placeholder="Set all commission values for filtered data"
+        className={styles.input}
+        onChange={(e) => {
+          setCommissionValue(Number(e.target.value))
+        }}
+      />
+      <input
+        type={'button'}
+        value={'Set Commission'}
+        className={styles.input}
+        onClick={handleMultiSet}
+      />
       <div className={styles.gridWrapper}>
-        <div className="ag-theme-alpine" style={{ height: 500, width: props.width * .9 }}>
+        <div
+          className="ag-theme-alpine"
+          style={{ height: 500, width: props.width * 1 }}
+        >
           <AgGridReact
             //@ts-ignore
             ref={gridRef}
