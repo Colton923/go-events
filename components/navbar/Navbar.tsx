@@ -5,7 +5,7 @@ import { NavbarProps } from '../../types/props'
 import { auth } from '../../firebase/firebaseClient'
 
 export const Navbar = (props: NavbarProps) => {
-  if (!props.user) {
+  if (!props.user || props.authUser === null) {
     return null
   }
   return (
@@ -39,12 +39,12 @@ export const Navbar = (props: NavbarProps) => {
           }}
           className={styles.input}
         />
-        <input
+        {/* <input
           type="button"
           value="Date Filter"
           onClick={() => props.setShowDateFilter(!props.showDateFilter)}
           className={styles.input}
-        />
+        /> */}
         <input
           type="button"
           value="Pivot"
@@ -58,7 +58,21 @@ export const Navbar = (props: NavbarProps) => {
           className={styles.input}
         />
         <div>
-        <input type="button" className={styles.input} onClick={() => auth.signOut()} value={'Sign Out'}/>
+          <input
+            type="button"
+            className={styles.input}
+            onClick={() => {
+              props.setShowAddNewEmployee(false)
+              props.setShowCommissionGrid(false)
+              props.setShowCSVImport(false)
+              props.setShowFirebaseGrid(false)
+              props.setShowFirebaseImport(false)
+              props.setShowPivot(false)
+              props.setShowPivotTotals(false)
+              auth.signOut()
+            }}
+            value={'Sign Out'}
+          />
         </div>
       </div>
     </div>

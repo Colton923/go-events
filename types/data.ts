@@ -27,6 +27,7 @@ export type EmployeeData = {
   organization: string
   id: string
   actionDate: string
+  date: string
   eventProfit: number
   totalEvent: number
 }

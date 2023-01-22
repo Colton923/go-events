@@ -57,7 +57,6 @@ export const Login = (props: LoginProps) => {
               .then((result) => {
                 const userLoggedIn = result.user
                 let thisName = ''
-                console.log(userLoggedIn.uid)
                 const uid = userLoggedIn.uid
                 const oldrefCol = collection(db, 'users')
                 getDocs(oldrefCol)

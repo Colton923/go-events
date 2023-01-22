@@ -62,6 +62,7 @@ export default function Index() {
     showPivot: showPivot,
     showPivotTotals: showPivotTotals,
     user: user,
+    authUser: authUser,
   }
   const gridProps: Prop.GridProps = {
     rowData: rowData,
@@ -129,9 +130,11 @@ export default function Index() {
         user.uid === process.env.NEXT_PUBLIC_FIREBASE_ADMIN_FRANK
       ) {
         setIsAdmin(true)
+      } else {
+        setIsAdmin(false)
       }
     }
-  }, [user, authUser])
+  }, [user, authUser, authLoading, authError])
 
   if (authLoading) return <div>Loading...</div>
 

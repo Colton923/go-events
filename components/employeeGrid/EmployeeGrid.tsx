@@ -40,6 +40,7 @@ export const EmployeeGrid = (props: EmployeeGridProps) => {
     setLastMonday(new Date(today.setDate(diff)))
     setThisSunday(new Date(today.setDate(diff + 6)))
   }, [])
+
   const TryGetCommission = async () => {
     try {
       const dataCol = collection(db, 'commission')
@@ -71,7 +72,7 @@ export const EmployeeGrid = (props: EmployeeGridProps) => {
       querySnapshot.forEach((doc) => {
         const data = doc.data().data
         data.forEach((row: EmployeeData) => {
-          const date = new Date(row.actionDate)
+          const date = new Date(row.date)
           if (
             row.salesperson === props.userName &&
             date >= lastMonday &&
@@ -84,6 +85,7 @@ export const EmployeeGrid = (props: EmployeeGridProps) => {
               actionDate: row.actionDate,
               salesperson: row.salesperson,
               eventProfit: 0,
+              date: row.date,
             }
 
             employeeCommission.findIndex((commission) => {
@@ -164,7 +166,7 @@ export const EmployeeGrid = (props: EmployeeGridProps) => {
     },
     {
       headerName: 'Event Date',
-      field: 'actionDate',
+      field: 'date',
       valueGetter: valueGetter,
       filter: 'text',
     },

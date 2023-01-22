@@ -90,6 +90,7 @@ export interface NavbarProps {
   showPivot: boolean
   showPivotTotals: boolean
   user: any
+  authUser: any
 }
 
 export interface AddNewEmployeeProps {
