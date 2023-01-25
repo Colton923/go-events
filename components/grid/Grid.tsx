@@ -17,6 +17,18 @@ import type { CommissionManagerData, PivotCommissionData } from '../../types/dat
 export const Grid = (props: GridProps) => {
   const [gridApi, setGridApi] = useState(null)
   const [gridColumnApi, setGridColumnApi] = useState(null)
+  const [lastMonday, setLastMonday] = useState<Date>(new Date())
+  const [thisSunday, setThisSunday] = useState<Date>(new Date())
+
+  useEffect(() => {
+    setLastMonday(new Date())
+    setThisSunday(new Date())
+    const today = new Date()
+    const day = today.getDay()
+    const diff = today.getDate() - day + (day === 0 ? -6 : 1)
+    setLastMonday(new Date(today.setDate(diff)))
+    setThisSunday(new Date(today.setDate(diff + 6)))
+  }, [])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,6 +54,36 @@ export const Grid = (props: GridProps) => {
     return params.data[params.colDef.field]
   }
 
+  const filterParams = {
+    comparator: (filterLocalDateAtMidnight: any, cellValue: any) => {
+      const dateAsString = cellValue
+      if (dateAsString === null) return -1
+      const dateParts = dateAsString.split('/')
+      const cellDate = new Date(
+        Number(dateParts[2]),
+        Number(dateParts[0]) - 1,
+        Number(dateParts[1])
+      )
+
+      if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
+        return 0
+      }
+
+      if (cellDate < filterLocalDateAtMidnight) {
+        return -1
+      }
+
+      if (cellDate > filterLocalDateAtMidnight) {
+        return 1
+      }
+      return 0
+    },
+    browserDatePicker: true,
+    minValidYear: 2000,
+    maxValidYear: 2025,
+    inRangeFloatingFilterDateFormat: 'Do MMM YYYY',
+  }
+
   const columnDefs = [
     { headerName: 'Client Name', field: 'client', valueGetter: valueGetter },
     {
@@ -59,7 +101,7 @@ export const Grid = (props: GridProps) => {
       headerName: 'Event Date',
       field: 'date',
       valueGetter: valueGetter,
-      filter: 'date',
+      filter: 'agDateColumnFilter',
     },
     {
       headerName: 'Assigned Employee',
@@ -83,7 +125,8 @@ export const Grid = (props: GridProps) => {
       headerName: 'Action Date',
       field: 'actionDate',
       valueGetter: valueGetter,
-      filter: 'date',
+      filter: 'agDateColumnFilter',
+      filterParams: filterParams,
     },
     {
       headerName: 'Next Action',
@@ -176,11 +219,60 @@ export const Grid = (props: GridProps) => {
     props.setPivotData(tempPivotData)
     props.setShowPivot(true)
   }
+
+  const UpdateView = async () => {
+    const dateRange = {
+      start: lastMonday,
+      end: thisSunday,
+    }
+    const dataToFilter = props.rowData
+    const filteredData = dataToFilter.filter((row) => {
+      const rowDate = new Date(row.actionDate)
+      return rowDate >= dateRange.start && rowDate <= dateRange.end
+    })
+    props.setRowData(filteredData)
+  }
+
   if (!props.activeComponent) {
     return null
   }
   return (
     <div className={styles.cardWrapper}>
+      <div className={styles.gridWrapper}>
+        <h1 className={styles.header}>Date Filter</h1>
+        <input
+          type="date"
+          id="start"
+          className={styles.input}
+          name="Commission Beginning"
+          defaultValue={lastMonday.toISOString().slice(0, 10)}
+          onChange={(e) => {
+            if (e.target.valueAsDate) {
+              setLastMonday(new Date(e.target.valueAsDate))
+            }
+          }}
+        />
+        <input
+          type="date"
+          id="end"
+          className={styles.input}
+          name="Commission Ending"
+          defaultValue={thisSunday.toISOString().slice(0, 10)}
+          onChange={(e) => {
+            if (e.target.valueAsDate) {
+              setThisSunday(new Date(e.target.valueAsDate))
+            }
+          }}
+        />
+        <input
+          type="button"
+          className={styles.input}
+          value="Filter"
+          onClick={() => {
+            UpdateView()
+          }}
+        />
+      </div>
       <h1 className={styles.header}>All Data Grid</h1>
       <h1 className={styles.subHeader}>Rows: {props.rowData.length}</h1>
       <ExportButton
