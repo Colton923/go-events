@@ -21,59 +21,46 @@ export const CommissionGrid = (props: CommissionGridProps) => {
   useEffect(() => {
     if (!props.activeComponent) return
     const fetchData = async () => {
-      const tempOrg = props.rowData.map((row) => {
+      // Get unique employees and organizations
+      const orgs = props.rowData.map((row) => {
         return row.organization
       })
-      const uniqueEmployees = props.rowData.map((row) => {
+      const employees = props.rowData.map((row) => {
         return row.salesperson
       })
 
-      let matches = 0
+      const tempOrg = [...new Set(orgs)]
+      const uniqueEmployees = [...new Set(employees)]
       const data = await getDocs(collection(db, 'commission'))
-      const tempData: CommissionManagerData[] = []
-      const newMatch: CommissionManagerData[] = []
       const commissionData = data.docs[0].data().data
 
-      commissionData.forEach((row: any) => {
-        if (
-          uniqueEmployees.includes(row.salesperson) &&
-          tempOrg.includes(row.organization)
-        ) {
-          tempData.push({
-            salesperson: row.salesperson,
-            organization: row.organization,
-            commission: row.commission,
-          })
-        } else {
-          matches++
-          const findEmployee = uniqueEmployees.reduce((acc, curr) => {
-            if (curr !== row.salesperson) {
-              return curr
-            }
-            return acc
-          }, '')
+      const tempData: CommissionManagerData[] = []
 
-          const findOrganization = tempOrg.reduce((acc, curr) => {
-            if (curr !== row.organization) {
-              return curr
-            }
-            return acc
-          }, '')
-
+      tempOrg.map((org) => {
+        uniqueEmployees.map((employee) => {
           tempData.push({
-            salesperson: findEmployee,
-            organization: findOrganization,
+            salesperson: employee,
+            organization: org,
             commission: 0.4,
           })
-          newMatch.push({
-            salesperson: row.salesperson,
-            organization: row.organization,
-            commission: row.commission,
-          })
-        }
+        })
       })
 
-      if (matches > 0) {
+      let matches = 0
+
+      commissionData.forEach((row: any) => {
+        tempData.forEach((tempRow) => {
+          if (
+            row.salesperson === tempRow.salesperson &&
+            row.organization === tempRow.organization
+          ) {
+            matches++
+            tempRow.commission = row.commission
+          }
+        })
+      })
+
+      if (matches !== tempData.length) {
         try {
           fetch('/api/firebase/post/manager', {
             method: 'POST',
