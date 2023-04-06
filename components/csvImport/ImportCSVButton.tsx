@@ -1,15 +1,22 @@
 'use client'
+
 import { ChangeEvent } from 'react'
 import { parse } from 'csv-parse'
 import { csvDataToJSON } from '../../utils/csvDataToJSON'
-import { ImportCSVButtonProps } from '../../types/props'
-import styles from '../../styles/App.module.css'
+import styles from '../../styles/App.module.scss'
+import { useLocalContext } from '../context/LocalContext'
+import { useFirebaseContext } from '../context/FirebaseContext'
+import type { CommissionData } from '../../types/data'
 
-export const ImportCSVButton = (props: ImportCSVButtonProps) => {
+export const ImportCSVButton = () => {
+  console.log('rendering ImportCSVButton', new Date().toLocaleTimeString())
+  const { setFilename, filename } = useLocalContext()
+  const { setRowData } = useFirebaseContext()
+
   const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return
     const file = e.target.files[0]
-    props.setFilename(file.name.split('.').slice(0, -1).join('.'))
+    setFilename(file.name.split('.').slice(0, -1).join('.'))
     const reader = new FileReader()
     reader.onload = (e) => {
       if (!e.target) return
@@ -33,16 +40,14 @@ export const ImportCSVButton = (props: ImportCSVButtonProps) => {
           ],
         },
         (err, data) => {
-          const json = csvDataToJSON(data)
-          props.setRowData(json)
+          const json = csvDataToJSON(data) as CommissionData[]
+          setRowData(json)
         }
       )
     }
     reader.readAsText(file)
   }
-  if (!props.activeComponent) {
-    return null
-  }
+
   return (
     <div className={styles.cardWrapper}>
       <h1 className={styles.header}>CSV Only</h1>
@@ -54,7 +59,7 @@ export const ImportCSVButton = (props: ImportCSVButtonProps) => {
           accept=".csv"
         />
       </div>
-      <h2 className={styles.header}>File Name: {props.fileName}</h2>
+      <h2 className={styles.header}>File Name: {filename}</h2>
     </div>
   )
 }

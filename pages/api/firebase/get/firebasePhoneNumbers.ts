@@ -10,6 +10,7 @@ if (!admin.apps.length) {
 }
 
 const handler = async (req: any, res: any) => {
+  console.log('api: firebasePhoneNumbers')
   const db = admin.firestore()
   const docCol = db.collection('users')
   const doc = await docCol.get()

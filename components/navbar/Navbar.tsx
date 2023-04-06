@@ -1,13 +1,16 @@
-'use client'
+import styles from '../../styles/App.module.scss'
+import { useLocalContext } from '../context/LocalContext'
+import { useFirebaseContext } from '../context/FirebaseContext'
 
-import styles from '../../styles/App.module.css'
-import { NavbarProps } from '../../types/props'
-import { auth } from '../../firebase/firebaseClient'
-
-export const Navbar = (props: NavbarProps) => {
-  if (!props.user || props.authUser === null) {
-    return null
+const Navbar = () => {
+  const { visibleComponents, setVisibleComponents } = useLocalContext()
+  const { handleSignOut } = useFirebaseContext()
+  const ChangeVisibleComponent = (component: string) => {
+    const newVisibleComponents = { ...visibleComponents }
+    newVisibleComponents[component] = !newVisibleComponents[component]
+    setVisibleComponents(newVisibleComponents)
   }
+
   return (
     <div className={styles.menuCard}>
       <h1 className={styles.header}>Menu</h1>
@@ -15,46 +18,40 @@ export const Navbar = (props: NavbarProps) => {
         <input
           type="button"
           value="Add New Employee"
-          onClick={() => props.setShowAddNewEmployee(!props.showAddNewEmployee)}
+          onClick={() => ChangeVisibleComponent('AddNewEmployee')}
           className={styles.input}
         />
         <input
           type="button"
           value="Commission Grid"
-          onClick={() => props.setShowCommissionGrid(!props.showCommissionGrid)}
+          onClick={() => ChangeVisibleComponent('CommissionGrid')}
           className={styles.input}
         />
         <input
           type="button"
           value="CSV Import"
-          onClick={() => props.setShowCSVImport(!props.showCSVImport)}
+          onClick={() => ChangeVisibleComponent('ImportCSVButton')}
           className={styles.input}
         />
         <input
           type="button"
           value="Firebase Import"
           onClick={() => {
-            props.setShowFirebaseGrid(!props.showFirebaseGrid)
-            props.setShowFirebaseImport(!props.showFirebaseImport)
+            ChangeVisibleComponent('ImportFirebaseDataButton')
+            ChangeVisibleComponent('Grid')
           }}
           className={styles.input}
         />
-        {/* <input
-          type="button"
-          value="Date Filter"
-          onClick={() => props.setShowDateFilter(!props.showDateFilter)}
-          className={styles.input}
-        /> */}
         <input
           type="button"
           value="Pivot"
-          onClick={() => props.setShowPivot(!props.showPivot)}
+          onClick={() => ChangeVisibleComponent('PivotGrid')}
           className={styles.input}
         />
         <input
           type="button"
           value="Pivot Totals"
-          onClick={() => props.setShowPivotTotals(!props.showPivotTotals)}
+          onClick={() => ChangeVisibleComponent('PivotTotals')}
           className={styles.input}
         />
         <div>
@@ -62,14 +59,8 @@ export const Navbar = (props: NavbarProps) => {
             type="button"
             className={styles.input}
             onClick={() => {
-              props.setShowAddNewEmployee(false)
-              props.setShowCommissionGrid(false)
-              props.setShowCSVImport(false)
-              props.setShowFirebaseGrid(false)
-              props.setShowFirebaseImport(false)
-              props.setShowPivot(false)
-              props.setShowPivotTotals(false)
-              auth.signOut()
+              handleSignOut()
+              window.location.reload()
             }}
             value={'Sign Out'}
           />
@@ -78,3 +69,5 @@ export const Navbar = (props: NavbarProps) => {
     </div>
   )
 }
+
+export default Navbar
