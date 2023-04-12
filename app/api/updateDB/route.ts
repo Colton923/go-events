@@ -1,5 +1,6 @@
 import * as admin from 'firebase-admin'
-import type { CommissionData, FirebaseData } from '../../../../types/data'
+import type { CommissionData } from 'types/data'
+import { NextResponse } from 'next/server'
 
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY as string)
 
@@ -23,7 +24,7 @@ const nextLocalId = (
   }
 }
 
-const handler = async (req: any, res: any) => {
+export async function GET() {
   console.log('api: migrateOrgs')
   try {
     const db = admin.firestore()
@@ -117,11 +118,9 @@ const handler = async (req: any, res: any) => {
     await employeesBatch.commit()
     await orgsBatch.commit()
     await salespeopleBatch.commit()
-    res.status(200).json({ message: 'success' })
+    return NextResponse.json({ newOrgs, newSalespeople, newEmployees })
   } catch (error: any) {
     console.log('error', error)
-    res.status(500).json({ error: error.message })
+    return NextResponse.json({ error })
   }
 }
-
-export default handler

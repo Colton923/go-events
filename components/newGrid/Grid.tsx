@@ -4,13 +4,29 @@ import 'ag-grid-community/styles/ag-theme-alpine.css'
 import { useGridContext } from './GridContext'
 import GridDateFilter from './gridDateFilter/GridDateFilter'
 import styles from './Grid.module.scss'
-import { useLocalContext } from '../context/LocalContext'
+import { useLocalContext } from 'components/context/LocalContext'
 
-const Grid = () => {
+interface GripProps {
+  params?: any
+}
+
+const Grid = (props: GripProps) => {
   const { screenWidth } = useLocalContext()
-  const { gridRef, onGridReady, defaultColDef, columnDefs, AGTheme, localRowData } =
-    useGridContext()
-  console.log('rendering Grid', new Date().toLocaleTimeString())
+  const { params } = props
+  const {
+    gridRef,
+    onGridReady,
+    defaultColDef,
+    columnDefs,
+    AGTheme,
+    localRowData,
+    setColumnDefs,
+  } = useGridContext()
+  console.log('rendering Grid')
+
+  if (!localRowData) return <div>Loading...</div>
+
+  if (localRowData.length === 0) return <div>No data</div>
   return (
     <div className={styles.wrapper}>
       <GridDateFilter />

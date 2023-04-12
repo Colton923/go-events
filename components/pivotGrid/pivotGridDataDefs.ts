@@ -1,5 +1,5 @@
 import type { ColDef } from 'ag-grid-community'
-import type { CommissionData, PivotData } from '../../types/data'
+import type { CommissionData, PivotData } from 'types/data'
 
 const valueGetter = (params: any) => {
   return params.data[params.colDef.field]

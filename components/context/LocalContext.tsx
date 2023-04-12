@@ -1,15 +1,7 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-import {
-  useMemo,
-  memo,
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-} from 'react'
+import { useMemo, memo, createContext, useContext, useState, useEffect } from 'react'
+
 export type LocalContextScope = {
   screenWidth: number
   setScreenWidth: React.Dispatch<React.SetStateAction<number>>
@@ -18,14 +10,14 @@ export type LocalContextScope = {
   visibleComponents: VisibleComponents
   setVisibleComponents: React.Dispatch<React.SetStateAction<VisibleComponents>>
   FixDecimalNumberToCurrency: (number: number) => string
-  router: ReturnType<typeof useRouter>
-}
-interface Props {
-  children: React.ReactNode
 }
 
 export type VisibleComponents = {
   [key: string]: boolean
+}
+
+interface Props {
+  children: React.ReactNode
 }
 
 export const LocalContext = createContext<LocalContextScope | null>(null)
@@ -48,7 +40,6 @@ export const LocalContextProvider = (props: Props) => {
     PivotGrid: false,
     PivotTotals: false,
   })
-  const router = useRouter()
 
   //idea
 
@@ -86,7 +77,6 @@ export const LocalContextProvider = (props: Props) => {
       visibleComponents,
       setVisibleComponents,
       FixDecimalNumberToCurrency,
-      router,
     }),
     [
       screenWidth,
@@ -96,7 +86,6 @@ export const LocalContextProvider = (props: Props) => {
       visibleComponents,
       setVisibleComponents,
       FixDecimalNumberToCurrency,
-      router,
     ]
   )
 

@@ -1,23 +1,33 @@
-import { useLocalContext } from '@components/context/LocalContext'
-import styles from '../../styles/App.module.scss'
-import { useFirebaseContext } from '../context/FirebaseContext'
-import Migration from '@components/migration/Migration'
+'use client'
+
+import styles from 'styles/App.module.scss'
+import { useFirebaseContext } from 'components/context/FirebaseContext'
+import { useEffect } from 'react'
+
+interface Props {
+  children: React.ReactNode
+}
 
 const Login = () => {
-  const {
-    authUser,
-    authLoading,
-    authError,
-    handleSignIn,
-    setPhoneNumber,
-    validAdmin,
-  } = useFirebaseContext()
-  const { router } = useLocalContext()
+  const { handleSignIn, setPhoneNumber, authLoading, authError, authUser } =
+    useFirebaseContext()
+
+  useEffect(() => {
+    if (authUser) {
+      const welcomeID = document.getElementById('welcomeID')
+      if (welcomeID) {
+        welcomeID.innerHTML = `Welcome ${
+          authUser.displayName ? authUser.displayName : authUser.phoneNumber
+        }`
+      }
+    }
+  }, [authUser])
+
   if (authLoading) {
     return (
       <div className={styles.main}>
         <div className={styles.title}>
-          <h1 className={styles.bigText}>Loading...</h1>
+          <h2 className={styles.bigText}>Loading...</h2>
         </div>
       </div>
     )
@@ -27,39 +37,16 @@ const Login = () => {
     return (
       <div className={styles.main}>
         <div className={styles.title}>
-          <h1 className={styles.bigText}>Error: {authError.message}</h1>
+          <h2 className={styles.bigText}>Error: {authError.message}</h2>
         </div>
       </div>
     )
-  }
-
-  if (authUser) {
-    if (validAdmin) {
-      setTimeout(() => {
-        router.push('/admin')
-      }, 3000)
-    } else {
-      setTimeout(() => {
-        router.push('/employee')
-      }, 3000)
-    }
-
-    return (
-      <div className={styles.main}>
-        <div className={styles.subHeader}>
-          <h1>
-            Welcome Back
-            {authUser.displayName ? authUser.displayName : authUser.phoneNumber}
-          </h1>
-        </div>
-      </div>
-    )
-  } else {
+  } else if (!authUser) {
     return (
       <div className={styles.main}>
         <div className={styles.title}>
           <div id="recaptcha-container"></div>
-          <h1 className={styles.bigText}>Please Sign In</h1>
+          <h2 className={styles.bigText}>Please Sign In</h2>
           <input
             className={styles.input}
             type="text"
@@ -76,6 +63,16 @@ const Login = () => {
             value="Sign In"
             onClick={handleSignIn}
           />
+        </div>
+      </div>
+    )
+  } else {
+    return (
+      <div className={styles.main}>
+        <div className={styles.title}>
+          <h2 className={styles.bigText} id="welcomeID">
+            Welcome
+          </h2>
         </div>
       </div>
     )

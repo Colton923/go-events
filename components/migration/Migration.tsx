@@ -2,7 +2,7 @@
 
 const Migration = () => {
   const HandleMigration = () => {
-    fetch('/api/firebase/get/updateDB')
+    fetch('/api/firebase/updateDB')
   }
 
   return <button onClick={HandleMigration}>Migrate</button>

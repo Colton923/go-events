@@ -1,6 +1,6 @@
 import type { GridApi, ColumnApi } from 'ag-grid-community'
 import type { ColDef } from 'ag-grid-community'
-import { PivotData } from '../../types/data'
+import { PivotData } from 'types/data'
 
 export type DataCheckerFunction = (data: any) => boolean
 

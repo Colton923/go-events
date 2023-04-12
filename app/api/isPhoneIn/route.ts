@@ -1,5 +1,7 @@
 import * as admin from 'firebase-admin'
-import { NextApiRequest, NextApiResponse } from 'next'
+import { NextApiRequest } from 'next'
+import { NextResponse } from 'next/server'
+
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY as string)
 
 if (!admin.apps.length) {
@@ -9,7 +11,7 @@ if (!admin.apps.length) {
   })
 }
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+export async function GET(req: NextApiRequest) {
   console.log('api: isPhoneIn')
   const { phone } = req.body
   const db = admin.firestore()
@@ -20,13 +22,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const data = doc.data()
       if (data.phone) {
         if (phone === data.phone) {
-          return res.status(200).json({ isPhoneIn: true })
+          return NextResponse.json({
+            isPhoneIn: true,
+          })
         }
       }
     })
   } catch (error: any) {
-    return res.status(500).json({ error: error.message })
+    return NextResponse.json({
+      error: error.message,
+    })
   }
 }
-
-export default handler

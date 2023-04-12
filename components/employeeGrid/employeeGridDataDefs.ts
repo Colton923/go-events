@@ -1,5 +1,5 @@
 import type { ColDef } from 'ag-grid-community'
-import type { CommissionData, EmployeeData } from '../../types/data'
+import type { EmployeeData } from 'types/data'
 
 const valueGetter = (params: any) => {
   return params.data[params.colDef.field]
@@ -24,18 +24,18 @@ const employeeGridDataDefs = [
     valueGetter: valueGetter,
     filter: 'text',
   },
-  {
-    headerName: 'Event Net Profit',
-    field: 'eventProfit',
-    valueGetter: valueGetter,
-    filter: 'text',
-    valueFormatter: (params: any) => {
-      if (typeof params.value === 'number') {
-        return `$${params.value.toFixed(2)}`
-      }
-      return params.value
-    },
-  },
+  // {
+  //   headerName: 'Event Net Profit',
+  //   field: 'eventProfit',
+  //   valueGetter: valueGetter,
+  //   filter: 'text',
+  //   valueFormatter: (params: any) => {
+  //     if (typeof params.value === 'number') {
+  //       return `$${params.value.toFixed(2)}`
+  //     }
+  //     return params.value
+  //   },
+  // },
   {
     headerName: 'Commission',
     field: 'totalEvent',

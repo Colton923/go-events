@@ -1,4 +1,5 @@
 import * as admin from 'firebase-admin'
+import { NextResponse } from 'next/server'
 
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY as string)
 
@@ -9,7 +10,7 @@ if (!admin.apps.length) {
   })
 }
 
-const handler = async (req: any, res: any) => {
+export async function GET() {
   console.log('api: firebasePhoneNumbers')
   const db = admin.firestore()
   const docCol = db.collection('users')
@@ -21,8 +22,5 @@ const handler = async (req: any, res: any) => {
       phoneNumbers.push(data.phone)
     }
   })
-
-  res.status(200).json(phoneNumbers)
+  return NextResponse.json(phoneNumbers)
 }
-
-export default handler

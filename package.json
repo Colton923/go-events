@@ -17,27 +17,26 @@
     "firebase": "^9.15.0",
     "firebase-admin": "^11.4.1",
     "lint-staged": "^13.1.0",
-    "next": "^13.1.1",
+    "next": "^13.3.1-canary.4",
     "postcss": "^8.4.20",
     "prettier": "^2.8.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-firebase-hooks": "^5.1.1",
     "react-papaparse": "^4.1.0",
-    "typescript": "^4.9.4",
-    "vercel": "^19.1.2",
     "sass": "^1.59.3",
-    "scss": "^0.2.4"
+    "scss": "^0.2.4",
+    "typescript": "^4.9.4"
   },
   "devDependencies": {
-    "eslint": "^8.28.0",
-    "eslint-config-next": "^13.0.5",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-react": "^7.31.11",
     "@types/node": "^18.11.18",
     "@types/react": "^18.0.26",
     "@types/react-dom": "^18.0.10",
-    "@typescript-eslint/eslint-plugin": "^5.48.0"
+    "@typescript-eslint/eslint-plugin": "^5.48.0",
+    "eslint": "^8.28.0",
+    "eslint-config-next": "^13.3.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-react": "^7.31.11"
   }
 }

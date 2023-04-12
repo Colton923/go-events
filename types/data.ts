@@ -33,7 +33,7 @@ export type PivotData = Pick<
 
 export type EmployeeData = Pick<
   CommissionData,
-  'employee' | 'salesperson' | 'organization'
+  'organization' | 'eventId' | 'date' | 'totalEvent'
 >
 
 export type CommissionGridData = Pick<

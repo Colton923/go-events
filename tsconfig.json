@@ -25,13 +25,13 @@
       }
     ],
     "paths": {
-      "@app/*": ["./app/*"],
-      "@components/*": ["./components/*"],
-      "@lib/*": ["./lib/*"],
-      "@pages/*": ["./pages/*"],
-      "@public/*": ["./public/*"],
-      "@styles/*": ["./styles/*"],
-      "@utils/*": ["./utils/*"]
+      "app/*": ["./app/*"],
+      "components/*": ["./components/*"],
+      "lib/*": ["./lib/*"],
+      "public/*": ["./public/*"],
+      "styles/*": ["./styles/*"],
+      "utils/*": ["./utils/*"],
+      "types/*": ["./types/*"],
     },
   },
   "include": [
@@ -39,8 +39,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "src/pages/api/[...nextauth].js"
-, "app/checkout/CheckoutForm.jsx", "api/stripe_intent.js"  ],
+  ],
   "exclude": [
     "node_modules"
   ]

@@ -1,8 +1,8 @@
-import styles from '../../styles/App.module.scss'
-import Grid from '../newGrid/Grid'
+import styles from 'styles/App.module.scss'
+import Grid from 'components/newGrid/Grid'
 import pivotGridDataDefs from './pivotGridDataDefs'
-import { useGridContext } from '../newGrid/GridContext'
-import { useLocalContext } from '@components/context/LocalContext'
+import { useGridContext } from 'components/newGrid/GridContext'
+import { useLocalContext } from 'components/context/LocalContext'
 
 export const PivotGrid = () => {
   const { setColumnDefs, pivotData, setLocalRowData } = useGridContext()

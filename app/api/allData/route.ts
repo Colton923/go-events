@@ -1,5 +1,6 @@
 import * as admin from 'firebase-admin'
-import type { CommissionData } from '../../../../types/data'
+import type { CommissionData } from 'types/data'
+import { NextResponse } from 'next/server'
 
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY as string)
 
@@ -10,7 +11,7 @@ if (!admin.apps.length) {
   })
 }
 
-const handler = async (req: any, res: any) => {
+export async function GET() {
   console.log('api: allData')
   try {
     const FillCommissionData = async () => {
@@ -28,10 +29,11 @@ const handler = async (req: any, res: any) => {
     }
 
     const commissions = await FillCommissionData()
-    res.status(200).json({ commissions })
+    return NextResponse.json(commissions)
   } catch (error: any) {
-    res.status(500).json({ error: error.message })
+    console.log(error)
+    return NextResponse.json({
+      error: error.message,
+    })
   }
 }
-
-export default handler

@@ -1,9 +1,9 @@
-import styles from '../../styles/App.module.scss'
-import NewGrid from '../newGrid/Grid'
-import { useGridContext } from '../newGrid/GridContext'
+import styles from 'styles/App.module.scss'
+import NewGrid from 'components/newGrid/Grid'
+import { useGridContext } from 'components/newGrid/GridContext'
+import { ImportFirebaseDataButton } from 'components/importFirebase/ImportFirebaseDataButton'
+import { useLocalContext } from 'components/context/LocalContext'
 import allDataGridDefs from './allDataGridDefs'
-import { ImportFirebaseDataButton } from '@components/importFirebase/ImportFirebaseDataButton'
-import { useLocalContext } from '@components/context/LocalContext'
 
 export const AllDataGrid = () => {
   console.log('rendering AllDataGrid', new Date().toLocaleTimeString())

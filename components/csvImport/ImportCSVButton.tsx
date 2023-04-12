@@ -2,11 +2,11 @@
 
 import { ChangeEvent } from 'react'
 import { parse } from 'csv-parse'
-import { csvDataToJSON } from '../../utils/csvDataToJSON'
-import styles from '../../styles/App.module.scss'
-import { useLocalContext } from '../context/LocalContext'
-import { useFirebaseContext } from '../context/FirebaseContext'
-import type { CommissionData } from '../../types/data'
+import { csvDataToJSON } from 'utils/csvDataToJSON'
+import styles from 'styles/App.module.scss'
+import { useLocalContext } from 'components/context/LocalContext'
+import { useFirebaseContext } from 'components/context/FirebaseContext'
+import type { CommissionData } from 'types/data'
 
 export const ImportCSVButton = () => {
   console.log('rendering ImportCSVButton', new Date().toLocaleTimeString())
@@ -40,8 +40,8 @@ export const ImportCSVButton = () => {
           ],
         },
         (err, data) => {
-          const json = csvDataToJSON(data) as CommissionData[]
-          setRowData(json)
+          const json = csvDataToJSON(data)
+          setRowData(json as CommissionData[])
         }
       )
     }

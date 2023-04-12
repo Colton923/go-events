@@ -1,6 +1,6 @@
-import styles from '../../styles/App.module.scss'
-import { useLocalContext } from '../context/LocalContext'
-import { useFirebaseContext } from '../context/FirebaseContext'
+import styles from 'styles/App.module.scss'
+import { useLocalContext } from 'components/context/LocalContext'
+import { useFirebaseContext } from 'components/context/FirebaseContext'
 
 const Navbar = () => {
   const { visibleComponents, setVisibleComponents } = useLocalContext()

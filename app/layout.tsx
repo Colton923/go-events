@@ -1,9 +1,6 @@
-import '../styles/global.css'
-
-import { LocalContextProvider } from '../components/context/LocalContext'
-import { FirebaseContextProvider } from '../components/context/FirebaseContext'
-
-import styles from '../styles/App.module.scss'
+import 'styles/global.css'
+import styles from 'styles/App.module.scss'
+import { Providers } from './providers'
 interface Props {
   children: React.ReactNode
 }
@@ -22,11 +19,9 @@ export default async function RootLayout({ children }: Props) {
       <body style={{ margin: 0 }}>
         <main>
           <div className={styles.main}>
-            <LocalContextProvider>
-              <FirebaseContextProvider>
-                <div className={styles.allCardsWrapper}>{children}</div>
-              </FirebaseContextProvider>
-            </LocalContextProvider>
+            <div className={styles.allCardsWrapper}>
+              <Providers>{children}</Providers>
+            </div>
           </div>
         </main>
       </body>

@@ -1,8 +1,8 @@
-import styles from '@styles/App.module.scss'
-import commissionDataDefs from '@components/commissionGrid/commissionDataDefs'
-import NewGrid from '@components/newGrid/Grid'
-import { useGridContext } from '@components/newGrid/GridContext'
-import { useLocalContext } from '@components/context/LocalContext'
+import styles from 'styles/App.module.scss'
+import commissionDataDefs from 'components/commissionGrid/commissionDataDefs'
+import NewGrid from 'components/newGrid/Grid'
+import { useGridContext } from 'components/newGrid/GridContext'
+import { useLocalContext } from 'components/context/LocalContext'
 
 export const CommissionGrid = () => {
   console.log('rendering CommissionGrid', new Date().toLocaleTimeString())

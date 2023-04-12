@@ -1,4 +1,4 @@
-import { PivotData, CommissionData } from '../../../types/data'
+import { PivotData, CommissionData } from 'types/data'
 
 const PivotTable = (input: CommissionData[]) => {
   const output: PivotData[] = []

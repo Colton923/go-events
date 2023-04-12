@@ -2,7 +2,7 @@
 
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { auth } from '../../firebase/firebaseClient'
-import type { CommissionData } from '../../types/data'
+import type { CommissionData } from 'types/data'
 import {
   useMemo,
   memo,
@@ -13,7 +13,7 @@ import {
   useCallback,
 } from 'react'
 import { RecaptchaVerifier, signInWithPhoneNumber, User } from 'firebase/auth'
-import { useGridContext } from '@components/newGrid/GridContext'
+import { useRouter } from 'next/navigation'
 
 export type FirebaseContextScope = {
   authUser: User | null
@@ -40,7 +40,7 @@ export const FirebaseContext = createContext<FirebaseContextScope | null>(null)
 export const FirebaseContextProvider = (props: Props) => {
   console.log('rendering FirebaseContextProvider', new Date().toLocaleTimeString())
   const { children } = props
-  const [user, loading, error] = useAuthState(auth)
+  const [user] = useAuthState(auth)
   const [rowData, setRowData] = useState<CommissionData[]>([])
   const [phoneNumber, setPhoneNumber] = useState('')
   const [validPhone, setValidPhone] = useState(false)
@@ -48,6 +48,8 @@ export const FirebaseContextProvider = (props: Props) => {
   const [authUser, setAuthUser] = useState<User | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
   const [authError, setAuthError] = useState<any>(null)
+
+  const router = useRouter()
 
   useEffect(() => {
     if (user) {
@@ -62,23 +64,7 @@ export const FirebaseContextProvider = (props: Props) => {
   }, [user])
 
   //TODO:
-  // const handleNewEmployee = () => {
-  //   const newEmployee = {
-  //     name: employeeName,
-  //     phone: employeePhone,
-  //   }
-  //   addDoc(collection(db, 'users'), newEmployee)
-  //     .then(() => {
-  //       alert('Employee Added')
-  //       setEmployeeName('')
-  //       setEmployeePhone('')
-  //       document.getElementById('employeeName')?.setAttribute('value', '')
-  //       document.getElementById('employeePhone')?.setAttribute('value', '')
-  //     })
-  //     .catch((error) => {
-  //       alert('Error adding employee: ' + error)
-  //     })
-  // }
+
   //
   //TODO:
   // const handleSubmitToDatabase = () => {
@@ -111,7 +97,7 @@ export const FirebaseContextProvider = (props: Props) => {
 
   const isPhoneIn = useCallback(async () => {
     if (!phoneNumber) return false
-    const checkDb = await fetch('/api/firebase/get/isPhoneIn', {
+    const checkDb = await fetch('/isPhoneIn', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -133,7 +119,7 @@ export const FirebaseContextProvider = (props: Props) => {
 
   const isAdmin = useCallback(async () => {
     if (!authUser) return false
-    const checkDb = await fetch('/api/firebase/get/amIAdmin', {
+    const checkDb = await fetch('/api/amIAdmin', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -146,7 +132,17 @@ export const FirebaseContextProvider = (props: Props) => {
           console.log(data.error)
           return false
         } else {
-          return data.isAdmin ? true : false
+          if (data.isAdmin) {
+            setTimeout(() => {
+              router.push('/admin')
+              return true
+            }, 2000)
+          } else {
+            setTimeout(() => {
+              router.push('/employee')
+              return false
+            }, 2000)
+          }
         }
       })
 
@@ -185,7 +181,7 @@ export const FirebaseContextProvider = (props: Props) => {
   useEffect(() => {
     const setIsAdmin = async () => {
       const admin = await isAdmin()
-      setValidAdmin(admin)
+      setValidAdmin(admin as boolean)
     }
     setIsAdmin()
   }, [authUser])

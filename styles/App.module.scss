@@ -176,3 +176,43 @@
   padding: 10px;
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
 }
+
+.fancy {
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  z-index: 1;
+
+  background-image: radial-gradient(
+    circle at 50% 50%,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(255, 255, 255, 0) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+
+  animation: fancy 3.4s cubic-bezier(0.075, 0.82, 0.165, 1) forwards;
+}
+
+@keyframes fancy {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  90% {
+    width: 100%;
+    height: 100%;
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
