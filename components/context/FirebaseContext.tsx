@@ -14,19 +14,24 @@ import {
 } from 'react'
 import { RecaptchaVerifier, signInWithPhoneNumber, User } from 'firebase/auth'
 import { useRouter } from 'next/navigation'
-
+import type { ReturnType } from 'app/api/commissionGridData/route'
+import type { PivotData } from 'types/data'
 export type FirebaseContextScope = {
   authUser: User | null
   authLoading: boolean
   authError: any
-  rowData: CommissionData[]
-  setRowData: React.Dispatch<React.SetStateAction<CommissionData[]>>
   phoneNumber: string
   setPhoneNumber: React.Dispatch<React.SetStateAction<string>>
   validPhone: boolean
   validAdmin: boolean
   handleSignIn: () => void
   handleSignOut: () => void
+  rowData: CommissionData[]
+  setRowData: React.Dispatch<React.SetStateAction<CommissionData[]>>
+  commissionGridData: ReturnType[]
+  setCommissionGridData: React.Dispatch<React.SetStateAction<ReturnType[]>>
+  pivotData: PivotData[]
+  setPivotData: React.Dispatch<React.SetStateAction<PivotData[]>>
 }
 
 interface Props {
@@ -41,18 +46,20 @@ export const FirebaseContextProvider = (props: Props) => {
   console.log('rendering FirebaseContextProvider', new Date().toLocaleTimeString())
   const { children } = props
   const [user] = useAuthState(auth)
-  const [rowData, setRowData] = useState<CommissionData[]>([])
   const [phoneNumber, setPhoneNumber] = useState('')
   const [validPhone, setValidPhone] = useState(false)
   const [validAdmin, setValidAdmin] = useState(false)
   const [authUser, setAuthUser] = useState<User | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
   const [authError, setAuthError] = useState<any>(null)
+  const [rowData, setRowData] = useState<CommissionData[]>([])
+  const [commissionGridData, setCommissionGridData] = useState<ReturnType[]>([])
+  const [pivotData, setPivotData] = useState<PivotData[]>([])
 
   const router = useRouter()
 
   useEffect(() => {
-    if (user) {
+    if (user !== null && user !== undefined) {
       setAuthUser(user)
       setAuthLoading(false)
       setAuthError(null)
@@ -62,38 +69,6 @@ export const FirebaseContextProvider = (props: Props) => {
       setAuthError(null)
     }
   }, [user])
-
-  //TODO:
-
-  //
-  //TODO:
-  // const handleSubmitToDatabase = () => {
-  //   if (!props.user) {
-  //     alert('You must be logged in to submit data')
-  //     return
-  //   }
-  //   setIsDisabled(true)
-  //   const dataCol = collection(db, 'data')
-  //   const uploadDateTime = new Date().toISOString()
-  //   const data = {
-  //     filename: props.filename,
-  //     uploadDateTime: uploadDateTime,
-  //     data: props.rowData,
-  //     user: props.user.uid,
-  //   }
-  //   const addData = async () => {
-  //     try {
-  //       await addDoc(dataCol, data)
-  //       alert('Data uploaded successfully')
-  //       setIsDisabled(false)
-  //     } catch (e) {
-  //       alert('Error uploading data')
-  //       console.log(e)
-  //       setIsDisabled(false)
-  //     }
-  //   }
-  //   addData()
-  // }
 
   const isPhoneIn = useCallback(async () => {
     if (!phoneNumber) return false
@@ -117,37 +92,24 @@ export const FirebaseContextProvider = (props: Props) => {
     return checkDb
   }, [phoneNumber])
 
-  const isAdmin = useCallback(async () => {
-    if (!authUser) return false
-    const checkDb = await fetch('/api/amIAdmin', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ uid: authUser.uid }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.error) {
-          console.log(data.error)
-          return false
-        } else {
-          if (data.isAdmin) {
-            setTimeout(() => {
-              router.push('/admin')
-              return true
-            }, 2000)
-          } else {
-            setTimeout(() => {
-              router.push('/employee')
-              return false
-            }, 2000)
-          }
-        }
-      })
-
-    return checkDb
-  }, [authUser])
+  const isAdmin = useCallback(() => {
+    console.log('rendering isAdmin', user)
+    if (!user) return false
+    if (
+      user.uid === process.env.NEXT_PUBLIC_FIREBASE_ADMIN_COLTON ||
+      user.uid === process.env.NEXT_PUBLIC_FIREBASE_ADMIN_FRANK
+    ) {
+      setTimeout(() => {
+        router.push('/admin')
+      }, 1000)
+      return true
+    } else {
+      setTimeout(() => {
+        router.push('/employee')
+      }, 2000)
+      return false
+    }
+  }, [user])
 
   const handleSignIn = async () => {
     const phone = phoneNumber
@@ -175,16 +137,106 @@ export const FirebaseContextProvider = (props: Props) => {
   }
 
   const handleSignOut = () => {
-    auth.signOut()
+    // auth.signOut()
   }
 
   useEffect(() => {
     const setIsAdmin = async () => {
       const admin = await isAdmin()
+      console.log('isAdmin: ', admin)
+      if (admin) {
+        await AllDataSync()
+        await CommissionGridDataSync()
+      }
       setValidAdmin(admin as boolean)
     }
     setIsAdmin()
-  }, [authUser])
+  }, [isAdmin])
+
+  const AllDataSync = async () => {
+    const data = await fetch('/api/allData', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }).then((res) => res.json())
+    setRowData(data as CommissionData[])
+  }
+
+  type PivotGrid = {
+    commission_percent: number
+    from_effective: string
+    id: number
+    manager: string
+    manager_commission_percent: number
+    organization: string
+    salesperson: string
+    to_effective: string
+  }
+
+  const CommissionGridDataSync = async () => {
+    const data = await fetch('/api/commissionGridData', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }).then((res) => {
+      if (res.status !== 200) {
+        console.log('error: ', res)
+      }
+      return res.json()
+    })
+    console.log('data: ', data)
+
+    setCommissionGridData(data as ReturnType[])
+
+    setPivotData(HandlePivotData(data as []))
+  }
+
+  const HandlePivotData = (commissionGrid: PivotGrid[]) => {
+    const commissionView: PivotData[] = commissionGrid
+
+      .filter((salesRow) => salesRow.salesperson && salesRow.salesperson !== null)
+      .map((salesRow) => {
+        const commissionRow = rowData.find((commissionRow) => {
+          return commissionRow.salesperson === salesRow.salesperson
+        })
+        if (commissionRow === undefined || commissionRow === null) {
+          return null // skip rows with missing data
+        }
+        const commissionAmount =
+          commissionRow?.totalEmployee * salesRow.commission_percent
+        const managerCommissionAmount =
+          commissionRow?.totalEmployee * salesRow.manager_commission_percent
+
+        console.log(
+          'totalEmployee = salespersonCommission% * totalEmployee: ',
+          commissionRow?.totalEmployee,
+          salesRow.commission_percent,
+          commissionAmount
+        )
+        console.log(
+          'totalManager = salespersonCommission% * totalEmployee: ',
+          commissionRow?.totalEmployee,
+          salesRow.manager_commission_percent,
+          managerCommissionAmount
+        )
+        return {
+          totalManager: managerCommissionAmount,
+          manager: salesRow.manager,
+          salesperson: salesRow.salesperson,
+          eventId: commissionRow.eventId,
+          totalEmployee: commissionAmount,
+          totalEvent: commissionRow.totalEvent,
+          organization: commissionRow.organization,
+          actionDate: commissionRow.actionDate,
+        }
+      })
+      .filter((row) => row !== null)
+
+    console.log('commissionView: ', commissionView)
+    return commissionView
+  }
 
   useEffect(() => {
     const setPhone = async () => {
@@ -192,34 +244,49 @@ export const FirebaseContextProvider = (props: Props) => {
       setValidPhone(phone)
     }
     setPhone()
-  }, [phoneNumber])
+  }, [isPhoneIn])
 
   const contextValue = useMemo(
     () => ({
       authUser,
       authLoading,
       authError,
-      rowData,
-      setRowData,
       phoneNumber,
       setPhoneNumber,
       validPhone,
       validAdmin,
       handleSignIn,
       handleSignOut,
+      rowData,
+      setRowData,
+      commissionGridData,
+      setCommissionGridData,
+      pivotData,
+      setPivotData,
     }),
     [
       authUser,
       authLoading,
       authError,
-      rowData,
-      setRowData,
       phoneNumber,
-      setPhoneNumber,
       validPhone,
       validAdmin,
       handleSignIn,
       handleSignOut,
+      isAdmin,
+      isPhoneIn,
+      setPhoneNumber,
+      setValidPhone,
+      setValidAdmin,
+      setAuthUser,
+      setAuthLoading,
+      setAuthError,
+      rowData,
+      setRowData,
+      commissionGridData,
+      setCommissionGridData,
+      pivotData,
+      setPivotData,
     ]
   )
 

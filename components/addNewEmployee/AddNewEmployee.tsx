@@ -1,10 +1,11 @@
 import styles from 'styles/App.module.scss'
 import { addDoc, collection, setDoc } from 'firebase/firestore'
 import { db } from '../../firebase/firebaseClient'
+import { useLocalContext } from 'components/context/LocalContext'
 
 export const AddNewEmployee = () => {
   console.log('rendering AddNewEmployee', new Date().toLocaleTimeString())
-
+  const { visibleComponents } = useLocalContext()
   const handleNewEmployee = () => {
     const employeeInput = document.getElementById('employeeName')
     const employeeName = employeeInput?.getAttribute('value')
@@ -26,6 +27,8 @@ export const AddNewEmployee = () => {
         alert('Error adding employee: ' + error)
       })
   }
+
+  if (!visibleComponents.AddNewEmployee) return null
 
   return (
     <div className={styles.cardWrapper}>

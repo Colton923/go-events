@@ -10,7 +10,7 @@ const EmployeeGrid = () => {
 
   return (
     <div className={styles.cardWrapper}>
-      <h1 className={styles.header}>Employee Data</h1>+
+      <h1 className={styles.header}>Employee Data</h1>
       <GridContextProvider>
         <NewGrid />
       </GridContextProvider>

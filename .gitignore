@@ -30,12 +30,16 @@ yarn-error.log*
 
 # local env files
 .env
+.env.local
 
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
+
+# certifications
+.crt
 
 # personal notes
 NOTES.md

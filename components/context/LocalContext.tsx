@@ -1,4 +1,5 @@
 'use client'
+import type { CommissionData } from 'types/data'
 
 import { useMemo, memo, createContext, useContext, useState, useEffect } from 'react'
 
@@ -41,16 +42,6 @@ export const LocalContextProvider = (props: Props) => {
     PivotTotals: false,
   })
 
-  //idea
-
-  // const debounceRequest = useCallback((callback: () => void, delay: number) => {
-  //   let timeoutId: NodeJS.Timeout
-  //   return (...args: any[]) => {
-  //     clearTimeout(timeoutId)
-  //     timeoutId = setTimeout(() => callback.apply(args) as any, delay)
-  //   }
-  // }, [])
-
   const FixDecimalNumberToCurrency = (number: number) => {
     const fixedNumber = number.toFixed(2)
     const numberWithCommas = fixedNumber.replace(/\d(?=(\d{3})+\.)/g, '$&,')
@@ -80,12 +71,11 @@ export const LocalContextProvider = (props: Props) => {
     }),
     [
       screenWidth,
-      setScreenWidth,
       filename,
-      setFilename,
       visibleComponents,
+      setFilename,
       setVisibleComponents,
-      FixDecimalNumberToCurrency,
+      setScreenWidth,
     ]
   )
 

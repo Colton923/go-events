@@ -5,85 +5,61 @@ const valueGetter = (params: any) => {
   return params.data[params.colDef.field]
 }
 
-const filterParams = {
-  comparator: (filterLocalDateAtMidnight: any, cellValue: any) => {
-    const dateAsString = cellValue
-    if (dateAsString === null) return -1
-    const dateParts = dateAsString.split('/')
-    const cellDate = new Date(
-      Number(dateParts[2]),
-      Number(dateParts[0]) - 1,
-      Number(dateParts[1])
-    )
-
-    if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
-      return 0
-    }
-
-    if (cellDate < filterLocalDateAtMidnight) {
-      return -1
-    }
-
-    if (cellDate > filterLocalDateAtMidnight) {
-      return 1
-    }
-    return 0
-  },
-  browserDatePicker: true,
-  minValidYear: 2000,
-  maxValidYear: 2025,
-  inRangeFloatingFilterDateFormat: 'Do MMM YYYY',
-}
-
 const commissionDataDefs = [
-  { headerName: 'Client Name', field: 'client', valueGetter: valueGetter },
   {
     headerName: 'Organization / Company',
     field: 'organization',
     valueGetter: valueGetter,
+    sortable: true,
   },
   {
     headerName: 'Event ID',
-    field: 'id',
+    field: 'eventId',
     valueGetter: valueGetter,
     filter: 'number',
+    sortable: true,
   },
   {
     headerName: 'Event Date',
     field: 'date',
     valueGetter: valueGetter,
-    filter: 'agDateColumnFilter',
+    filter: 'date',
+    sortable: true,
   },
   {
     headerName: 'Assigned Employee',
     field: 'employee',
     valueGetter: valueGetter,
     filter: 'text',
+    sortable: true,
   },
   {
     headerName: 'Status',
     field: 'status',
     valueGetter: valueGetter,
     filter: 'text',
+    sortable: true,
   },
   {
     headerName: 'Salesperson',
     field: 'salesperson',
     valueGetter: valueGetter,
     filter: 'text',
+    sortable: true,
   },
   {
     headerName: 'Action Date',
     field: 'actionDate',
     valueGetter: valueGetter,
-    filter: 'agDateColumnFilter',
-    filterParams: filterParams,
+    filter: 'date',
+    sortable: true,
   },
   {
     headerName: 'Next Action',
     field: 'nextAction',
     valueGetter: valueGetter,
     filter: 'text',
+    sortable: true,
   },
   {
     headerName: 'Total Fee',
@@ -91,24 +67,33 @@ const commissionDataDefs = [
     valueGetter: valueGetter,
     filter: 'number',
     valueFormatter: (params: any) => {
-      return `$${parseInt(params.value).toFixed(2)}`
+      return `$${parseInt(params.value)
+        .toFixed(2)
+        .replace(/\d(?=(\d{3})+\.)/g, '$&,')}`
     },
+    sortable: true,
   },
   {
     headerName: 'Employee Wage Total',
     field: 'totalEmployee',
     valueGetter: valueGetter,
     valueFormatter: (params: any) => {
-      return `$${parseInt(params.value).toFixed(2)}`
+      return `$${parseInt(params.value)
+        .toFixed(2)
+        .replace(/\d(?=(\d{3})+\.)/g, '$&,')}`
     },
+    sortable: true,
   },
   {
     headerName: 'Event Net Profit',
     field: 'totalEvent',
     valueGetter: valueGetter,
     valueFormatter: (params: any) => {
-      return `$${parseInt(params.value).toFixed(2)}`
+      return `$${parseInt(params.value)
+        .toFixed(2)
+        .replace(/\d(?=(\d{3})+\.)/g, '$&,')}`
     },
+    sortable: true,
   },
 ] as ColDef<CommissionData>[]
 

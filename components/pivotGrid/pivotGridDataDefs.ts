@@ -1,5 +1,5 @@
 import type { ColDef } from 'ag-grid-community'
-import type { CommissionData, PivotData } from 'types/data'
+import type { PivotData } from 'types/data'
 
 const valueGetter = (params: any) => {
   return params.data[params.colDef.field]
@@ -9,7 +9,38 @@ const valueFormatter = (params: any) => {
 }
 
 const pivotGridDataDefs = [
-  { headerName: 'Salesperson', field: 'salesperson', valueGetter: valueGetter },
+  {
+    headerName: 'Salesperson',
+    children: [
+      {
+        headerName: 'Name',
+        field: 'salesperson',
+        valueGetter: valueGetter,
+      },
+      {
+        headerName: 'Employee Wage Total',
+        field: 'totalEmployee',
+        valueGetter: valueGetter,
+        valueFormatter: valueFormatter,
+      },
+    ],
+  },
+  {
+    headerName: 'Manager',
+    children: [
+      {
+        headerName: 'Name',
+        field: 'manager',
+        valueGetter: valueGetter,
+      },
+      {
+        headerName: 'Manager Wage Total',
+        field: 'totalManager',
+        valueGetter: valueGetter,
+        valueFormatter: valueFormatter,
+      },
+    ],
+  },
   {
     headerName: 'Organization / Company',
     field: 'organization',
@@ -17,12 +48,7 @@ const pivotGridDataDefs = [
   },
   { headerName: 'Event ID', field: 'eventId', valueGetter: valueGetter },
   { headerName: 'Event Date', field: 'actionDate', valueGetter: valueGetter },
-  {
-    headerName: 'Employee Wage Total',
-    field: 'totalEmployee',
-    valueGetter: valueGetter,
-    valueFormatter: valueFormatter,
-  },
+
   {
     headerName: 'Event Net Profit',
     field: 'totalEvent',

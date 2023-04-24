@@ -23,7 +23,7 @@ const Navbar = () => {
         />
         <input
           type="button"
-          value="Commission Grid"
+          value="Commission Table"
           onClick={() => ChangeVisibleComponent('CommissionGrid')}
           className={styles.input}
         />
@@ -35,16 +35,15 @@ const Navbar = () => {
         />
         <input
           type="button"
-          value="Firebase Import"
+          value="Main Table"
           onClick={() => {
-            ChangeVisibleComponent('ImportFirebaseDataButton')
             ChangeVisibleComponent('Grid')
           }}
           className={styles.input}
         />
         <input
           type="button"
-          value="Pivot"
+          value="Pivoted Table"
           onClick={() => ChangeVisibleComponent('PivotGrid')}
           className={styles.input}
         />

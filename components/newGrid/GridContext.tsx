@@ -11,14 +11,11 @@ import {
   useCallback,
 } from 'react'
 import type { GridApi, ColumnApi } from 'ag-grid-community'
-import type { ColDef } from 'ag-grid-community'
 import * as Grid from './GridContextTypes'
-import { useFirebaseContext } from 'components/context/FirebaseContext'
-import type { CommissionData, EmployeeData, PivotData } from 'types/data'
+import type { PivotData } from 'types/data'
 import PivotTable from './utils/PivotTable'
-import { db } from '../../firebase/firebaseClient'
-import { collection, getDocs, where, query } from 'firebase/firestore'
-import employeeGridDataDefs from '../employeeGrid/employeeGridDataDefs'
+import { useFirebaseContext } from 'components/context/FirebaseContext'
+import { useLocalContext } from 'components/context/LocalContext'
 
 interface Props {
   children: React.ReactNode
@@ -28,97 +25,17 @@ export const GridContext = createContext<Grid.GridContextScope | null>(null)
 
 export const GridContextProvider = (props: Props) => {
   const { children } = props
-  const { rowData, validAdmin, authUser } = useFirebaseContext()
   const [gridApi, setGridApi] = useState<GridApi | null>(null)
   const [gridColumnApi, setGridColumnApi] = useState<ColumnApi | null>(null)
   const [localRowData, setLocalRowData] = useState<any[]>([])
-  const [defaultColDef, setDefaultColDef] = useState<ColDef>({
-    flex: 1,
-    minWidth: 200,
-    resizable: true,
-    sortable: true,
-  })
-  const [columnDefs, setColumnDefs] = useState<ColDef[]>([])
   const [pivotData, setPivotData] = useState<PivotData[]>([])
   const [AGTheme, setAGTheme] = useState<string>('ag-theme-alpine')
   const gridRef = useRef()
-  console.log('rendering GridContextProvider')
-
-  const fetchAllData = async () => {
-    if (!authUser) return
-    if (!validAdmin) return
-    const res = await fetch('/api/allData', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-    const data = await res.json()
-    if (!data) return
-
-    setLocalRowData(data.commissions)
-  }
-
-  const fetchEmployeeData = async () => {
-    console.log('in fetchEmployeeData')
-    if (!authUser) return
-    if (!authUser.phoneNumber) return
-    const phone = authUser.phoneNumber
-    const docCol = collection(db, 'users')
-    const snapshot = await getDocs(docCol)
-    const data = snapshot.docs.find((doc) => doc.data().phone === phone)?.data()
-    if (!data) {
-      return console.log('no data')
-    }
-    console.log('data: ', data)
-    const salesmanName = data.name as string
-    const commissions: CommissionData[] = []
-    const commissionsCol = collection(db, 'commissions')
-    const q = query(commissionsCol, where('name', '==', 'Sean McCaffrey'))
-    const commissionsSnapshot = await getDocs(q)
-    commissionsSnapshot.forEach((doc) => {
-      const data = doc.data() as CommissionData
-      commissions.push(data)
-    })
-    console.log('commissions: ', commissions)
-    return commissions
-  }
-
-  // useEffect(() => {
-  //   if (!rowData.length) return
-  //   setLocalRowData(rowData)
-  // }, [rowData])
-
-  useEffect(() => {
-    console.log(92)
-
-    // When columnDefs changes, fetch the data and set the localRowData
-    console.log('gridContext ColumnDefs changed')
-    if (validAdmin) {
-      if (!columnDefs.length) return
-      console.log('fetching all data')
-      fetchAllData()
-    } else {
-      console.log('fetching employee data')
-      setColumnDefs(employeeGridDataDefs)
-      fetchEmployeeData().then((data) => {
-        console.log('data: ', data)
-        if (!data) return
-
-        setLocalRowData(data)
-      })
-    }
-  }, [columnDefs, validAdmin])
-
-  useEffect(() => {
-    console.log(107)
-    // When localRowData changes, set the pivotData
-    if (!localRowData.length) return
-    const pivotTable = PivotTable(localRowData)
-    setPivotData(pivotTable)
-  }, [localRowData])
 
   const onGridReady = (params: { api: GridApi; columnApi: ColumnApi }) => {
+    if (!params.api) return
+    if (localRowData.length === 0) return
+    console.log('onGridReady')
     setGridApi(params.api)
     setGridColumnApi(params.columnApi)
 
@@ -127,18 +44,35 @@ export const GridContextProvider = (props: Props) => {
     params.columnApi.autoSizeAllColumns()
   }
 
+  useEffect(() => {
+    if (localRowData.length === 0) return
+    const UpdateView = async () => {
+      const startValue = document.getElementById('start') as HTMLInputElement
+      const endValue = document.getElementById('end') as HTMLInputElement
+
+      const dateRange = {
+        start: new Date(startValue.value),
+        end: new Date(endValue.value),
+      }
+      const filteredData = localRowData.filter((row) => {
+        const date = new Date(row.date)
+        return date >= dateRange.start && date <= dateRange.end
+      })
+
+      setLocalRowData(filteredData)
+    }
+    UpdateView()
+  }, [])
+
   const contextValue = useMemo<Grid.GridContextScope | null>(
     () => ({
       gridApi,
       gridColumnApi,
       localRowData,
-      defaultColDef,
-      columnDefs,
       AGTheme,
       gridRef,
       pivotData,
       onGridReady,
-      setColumnDefs,
       setAGTheme,
       setLocalRowData,
       setPivotData,
@@ -147,15 +81,12 @@ export const GridContextProvider = (props: Props) => {
       gridApi,
       gridColumnApi,
       localRowData,
-      defaultColDef,
-      columnDefs,
       AGTheme,
       gridRef,
       pivotData,
       onGridReady,
-      setLocalRowData,
-      setColumnDefs,
       setAGTheme,
+      setLocalRowData,
       setPivotData,
     ]
   )

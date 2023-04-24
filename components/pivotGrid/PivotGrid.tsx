@@ -1,26 +1,25 @@
+'use client'
+
 import styles from 'styles/App.module.scss'
-import Grid from 'components/newGrid/Grid'
+import NewGrid from 'components/newGrid/Grid'
 import pivotGridDataDefs from './pivotGridDataDefs'
-import { useGridContext } from 'components/newGrid/GridContext'
-import { useLocalContext } from 'components/context/LocalContext'
+import { useFirebaseContext } from 'components/context/FirebaseContext'
+import { GridContextProvider } from 'components/newGrid/GridContext'
 
 export const PivotGrid = () => {
-  const { setColumnDefs, pivotData, setLocalRowData } = useGridContext()
-  const { visibleComponents } = useLocalContext()
+  const { pivotData } = useFirebaseContext()
 
-  setColumnDefs(pivotGridDataDefs)
-
-  if (pivotData.length === 0) return <div>Loading...</div>
-
-  setLocalRowData(pivotData)
-  if (!visibleComponents.PivotGrid) return null
+  if (!pivotData) return <div>Loading...</div>
+  if (pivotData.length === 0) return <div>No data</div>
 
   return (
     <div className={styles.cardWrapper}>
-      <div className={styles.gridWrapper}>
-        <h1 className={styles.header}>Pivoted Data Grid</h1>
-        <Grid />
-      </div>
+      <GridContextProvider key={'pivot'}>
+        <div className={styles.gridWrapper}>
+          <h1 className={styles.header}>Pivot Table</h1>
+          <NewGrid gridDefs={pivotGridDataDefs} localData={pivotData} />
+        </div>
+      </GridContextProvider>
     </div>
   )
 }

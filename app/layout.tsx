@@ -1,6 +1,7 @@
 import 'styles/global.css'
 import styles from 'styles/App.module.scss'
 import { Providers } from './providers'
+
 interface Props {
   children: React.ReactNode
 }

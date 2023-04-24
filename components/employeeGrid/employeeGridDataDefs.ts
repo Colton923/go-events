@@ -44,6 +44,8 @@ const employeeGridDataDefs = [
     valueFormatter: (params: any) => {
       if (typeof params.value === 'number') {
         return `$${params.value.toFixed(2)}`
+      } else if (typeof params.value === 'string') {
+        return `$${parseFloat(params.value).toFixed(2)}`
       }
       return params.value
     },

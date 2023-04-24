@@ -1,3 +1,6 @@
+'use client'
+
+import { useFirebaseContext } from 'components/context/FirebaseContext'
 import { useGridContext } from '../GridContext'
 import { DataCheckerFunction } from '../GridContextTypes'
 import styles from './GridDataFilter.module.scss'
@@ -16,7 +19,7 @@ export type GridDataFilter = {
 }
 
 const GridDateFilter = () => {
-  const { localRowData, setLocalRowData } = useGridContext()
+  const { setLocalRowData, localRowData } = useGridContext()
 
   const LastDay = (day: Days) => {
     const today = new Date()
@@ -46,14 +49,12 @@ const GridDateFilter = () => {
   const UpdateView = async () => {
     const startValue = document.getElementById('start') as HTMLInputElement
     const endValue = document.getElementById('end') as HTMLInputElement
-
     const dateRange = {
       start: new Date(startValue.value),
       end: new Date(endValue.value),
     }
-
     const filteredData = localRowData.filter((row) => {
-      const date = new Date(row.Date)
+      const date = new Date(row.date)
       return date >= dateRange.start && date <= dateRange.end
     })
 
@@ -62,7 +63,6 @@ const GridDateFilter = () => {
 
   return (
     <div className={styles.wrapper}>
-      <h1 className={styles.header}>Date Filter</h1>
       <input
         type="date"
         id="start"

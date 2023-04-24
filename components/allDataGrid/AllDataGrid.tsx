@@ -1,26 +1,19 @@
+'use client'
+
 import styles from 'styles/App.module.scss'
 import NewGrid from 'components/newGrid/Grid'
-import { useGridContext } from 'components/newGrid/GridContext'
-import { ImportFirebaseDataButton } from 'components/importFirebase/ImportFirebaseDataButton'
-import { useLocalContext } from 'components/context/LocalContext'
-import allDataGridDefs from './allDataGridDefs'
-
-export const AllDataGrid = () => {
-  console.log('rendering AllDataGrid', new Date().toLocaleTimeString())
-  const { setColumnDefs, localRowData } = useGridContext()
-  const { visibleComponents } = useLocalContext()
-
-  setColumnDefs(allDataGridDefs)
-
-  if (localRowData.length === 0) return <div>Loading...</div>
-
-  if (!visibleComponents.Grid) return null
+import allGridDataDefs from './allDataGridDefs'
+import { GridContextProvider } from 'components/newGrid/GridContext'
+import { useFirebaseContext } from 'components/context/FirebaseContext'
+export function AllDataGrid() {
+  const { rowData } = useFirebaseContext()
 
   return (
     <div className={styles.cardWrapper}>
-      <h1 className={styles.header}>Commission Data</h1>
-      <ImportFirebaseDataButton />
-      <NewGrid />
+      <GridContextProvider key={'allData'}>
+        <h1 className={styles.header}>Main Table</h1>
+        <NewGrid gridDefs={allGridDataDefs} localData={rowData} />
+      </GridContextProvider>
     </div>
   )
 }

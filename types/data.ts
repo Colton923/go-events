@@ -21,15 +21,16 @@ export type CommissionData = {
   totalEvent: number
 }
 
-export type PivotData = Pick<
-  CommissionData,
-  | 'salesperson'
-  | 'eventId'
-  | 'totalEmployee'
-  | 'totalEvent'
-  | 'organization'
-  | 'actionDate'
->
+export type PivotData = {
+  totalManager: number
+  manager: string
+  salesperson: string
+  eventId: string
+  totalEmployee: number
+  totalEvent: number
+  organization: string
+  actionDate: string
+} | null
 
 export type EmployeeData = Pick<
   CommissionData,

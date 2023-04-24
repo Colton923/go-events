@@ -1,38 +1,8 @@
 import type { ColDef } from 'ag-grid-community'
-import type { CommissionData } from 'types/data'
+import type { ReturnType } from '../../app/api/commissionGridData/route'
 
 const valueGetter = (params: any) => {
   return params.data[params.colDef.field]
-}
-
-const filterParams = {
-  comparator: (filterLocalDateAtMidnight: any, cellValue: any) => {
-    const dateAsString = cellValue
-    if (dateAsString === null) return -1
-    const dateParts = dateAsString.split('/')
-    const cellDate = new Date(
-      Number(dateParts[2]),
-      Number(dateParts[0]) - 1,
-      Number(dateParts[1])
-    )
-
-    if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
-      return 0
-    }
-
-    if (cellDate < filterLocalDateAtMidnight) {
-      return -1
-    }
-
-    if (cellDate > filterLocalDateAtMidnight) {
-      return 1
-    }
-    return 0
-  },
-  browserDatePicker: true,
-  minValidYear: 2000,
-  maxValidYear: 2025,
-  inRangeFloatingFilterDateFormat: 'Do MMM YYYY',
 }
 
 const commissionDataDefs = [
@@ -43,16 +13,51 @@ const commissionDataDefs = [
   },
   {
     headerName: 'Salesperson',
-    field: 'salesperson',
+    children: [
+      {
+        headerName: 'Salesperson',
+        field: 'salesperson',
+        valueGetter: valueGetter,
+        filter: 'text',
+      },
+      {
+        headerName: 'Commission',
+        field: 'commission_percent',
+        valueGetter: valueGetter,
+        filter: 'text',
+      },
+    ],
+  },
+  {
+    headerName: 'Account Manager',
+    children: [
+      {
+        headerName: 'Account Manager',
+        field: 'manager',
+        valueGetter: valueGetter,
+        filter: 'text',
+      },
+      {
+        headerName: 'Manager Commission',
+        field: 'manager_commission_percent',
+        valueGetter: valueGetter,
+        filter: 'text',
+      },
+    ],
+  },
+
+  {
+    headerName: 'From Effective',
+    field: 'from_effective',
     valueGetter: valueGetter,
     filter: 'text',
   },
   {
-    headerName: 'Commission',
-    field: 'commission',
+    headerName: 'To Effective',
+    field: 'to_effective',
     valueGetter: valueGetter,
     filter: 'text',
   },
-] as ColDef<CommissionData>[]
+] as ColDef<ReturnType>[]
 
 export default commissionDataDefs

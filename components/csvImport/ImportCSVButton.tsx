@@ -1,5 +1,3 @@
-'use client'
-
 import { ChangeEvent } from 'react'
 import { parse } from 'csv-parse'
 import { csvDataToJSON } from 'utils/csvDataToJSON'
@@ -10,8 +8,10 @@ import type { CommissionData } from 'types/data'
 
 export const ImportCSVButton = () => {
   console.log('rendering ImportCSVButton', new Date().toLocaleTimeString())
-  const { setFilename, filename } = useLocalContext()
+  const { setFilename, filename, visibleComponents } = useLocalContext()
   const { setRowData } = useFirebaseContext()
+
+  if (!visibleComponents.ImportCSVButton) return null
 
   const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return
