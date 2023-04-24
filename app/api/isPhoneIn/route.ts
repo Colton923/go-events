@@ -1,6 +1,5 @@
 import * as admin from 'firebase-admin'
-import { NextApiRequest } from 'next'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY as string)
 
@@ -11,9 +10,16 @@ if (!admin.apps.length) {
   })
 }
 
-export async function GET(req: NextApiRequest) {
-  console.log('api: isPhoneIn')
-  const { phone } = req.body
+export async function POST(req: NextRequest) {
+  const body = req.body
+  //@ts-ignore
+  const phone = body.phone
+  if (!phone) {
+    return NextResponse.json({
+      error: 'Phone is required',
+    })
+  }
+
   const db = admin.firestore()
   const docCol = db.collection('users')
   try {

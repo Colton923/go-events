@@ -8,14 +8,10 @@ import {
   useState,
   useEffect,
   useRef,
-  useCallback,
 } from 'react'
 import type { GridApi, ColumnApi } from 'ag-grid-community'
 import * as Grid from './GridContextTypes'
 import type { PivotData } from 'types/data'
-import PivotTable from './utils/PivotTable'
-import { useFirebaseContext } from 'components/context/FirebaseContext'
-import { useLocalContext } from 'components/context/LocalContext'
 
 interface Props {
   children: React.ReactNode
